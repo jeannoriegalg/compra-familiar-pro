@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shopping Cart Pro</title>
+  
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary-red: #ff3b30;
+      --primary-blue: #007aff;
+      --primary-green: #28a745;
+      --soft-green-bg: #e8f5e9;
+      --dark-green-text: #1b5e20;
+      --light-gray: #f5f5f7;
+      --text-dark: #1d1d1f;
+      --text-gray: #8e8e93;
+      --border-color: #e0e0e0;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-dark);
+      padding-bottom: 150px;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar-custom {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .status-dot {
+      height: 8px;
+      width: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .online { background-color: var(--primary-green); }
+    .offline { background-color: var(--primary-red); }
+
+    .tasa-input {
+      border: none;
+      background: var(--light-gray);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      width: 100px;
+      text-align: center;
+    }
+
+    .tasa-input:focus {
+      outline: 2px solid var(--primary-blue);
+      background: white;
+    }
+
+    /* Lista de productos */
+    .product-list {
+      padding: 0;
+    }
+
+    .product-item {
+      display: flex;
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .product-item:active {
+      background: var(--light-gray);
+    }
+
+    .comprado {
+      background-color: var(--soft-green-bg) !important;
+      opacity: 0.9;
+    }
+
+    .comprado .product-name {
+      color: var(--dark-green-text);
+      text-decoration: line-through;
+    }
+
+    .product-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #f0f0f2;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .product-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+
+    .product-subtotal {
+      font-size: 12px;
+      color: var(--text-gray);
+    }
+
+    .price-badge {
+      background: rgba(255, 59, 48, 0.08);
+      color: var(--primary-red);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      width: 75px;
+      text-align: center;
+      padding: 6px 4px;
+      margin: 0 8px;
+    }
+
+    .comprado .price-badge {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--primary-green);
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f0f0f2;
+      border: none;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .qty-btn:active {
+      background: #ddd;
+      transform: scale(0.95);
+    }
+
+    .qty-value {
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    /* Footer */
+    .footer-resumen {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 1000;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .total-box {
+      text-align: center;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .total-box:active {
+      opacity: 0.7;
+    }
+
+    .total-label {
+      font-size: 11px;
+      color: var(--text-gray);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .total-val {
+      font-size: 20px;
+      font-weight: 700;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .divider {
+      width: 1px;
+      background: var(--border-color);
+      height: 40px;
+      align-self: center;
+      margin: 0 8px;
+    }
+
+    /* FAB Button */
+    .btn-fab {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: var(--text-dark);
+      color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 28px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-fab:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2000;
+      display: none;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Sección de archivados */
+    .archived-section {
+      background: #f8f8f8;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .product-item {
+        padding: 12px;
+      }
+      
+      .product-name {
+        font-size: 14px;
+      }
+      
+      .price-badge {
+        width: 65px;
+        font-size: 12px;
+      }
+      
+      .qty-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+      }
+    }
+
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+    }
+
+    .custom-toast {
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      animation: fadeInOut 3s ease;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Navbar -->
+  <div class="navbar-custom">
+    <div>
+      <input type="text" id="tasaCambio" class="tasa-input" placeholder="Tasa" onchange="actualizarTasa(this.value)">
+    </div>
+    <div style="font-weight: 700; font-size: 16px;">
+      Shopping Pro
+      <span id="onlineStatus" class="status-dot online"></span>
+    </div>
+    <div>
+      <span id="contadorItems" class="badge rounded-pill bg-danger" style="font-size: 12px;">0</span>
+    </div>
+  </div>
+
+  <!-- Lista de Productos -->
+  <div id="listaProductos" class="product-list"></div>
+
+  <!-- FAB Button -->
+  <button class="btn-fab" onclick="nuevoProducto()">+</button>
+
+  <!-- Footer -->
+  <div class="footer-resumen">
+    <div class="total-box">
+      <span class="total-label">Faltante</span>
+      <span id="totalPendiente" class="total-val" style="color: var(--primary-red);">$0,00</span>
+    </div>
+    <div class="divider"></div>
+    <div class="total-box" onclick="archivar()">
+      <span class="total-label">Carrito (Archivar)</span>
+      <span id="totalComprado" class="total-val" style="color: var(--primary-green);">$0,00</span>
+      <small id="totalBs" class="text-muted fw-bold" style="font-size: 10px; display: block; margin-top: 2px;">Bs. 0,00</small>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURACIÓN DE SUPABASE
+    // ============================================
+    const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_quCqL4dPbsPaOLj7BnpBfQ_qa_9rCSZ';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let productos = [];
+    let exchangeRate = 36.50;
+    let realtimeChannel = null;
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarDatosIniciales();
+      suscribirseACambios();
+    });
+
+    async function cargarDatosIniciales() {
+      showLoader(true);
+      
+      try {
+        // Cargar configuración
+        const { data: configData, error: configError } = await supabase
+          .from('config')
+          .select('exchange_rate')
+          .single();
+        
+        if (configError) throw configError;
+        exchangeRate = configData?.exchange_rate || 36.50;
+        document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
+        
+        // Cargar productos
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (productsError) throw productsError;
+        productos = productsData || [];
+        
+        renderizar();
+        showToast('Sincronizado');
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+        showToast('Error de conexión', 'error');
+        marcarOnline(false);
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    // ============================================
+    // REALTIME SUBSCRIPTION
+    // ============================================
+    function suscribirseACambios() {
+      realtimeChannel = supabase
+        .channel('shopping-changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'products' 
+          }, 
+          (payload) => {
+            console.log('Cambio detectado:', payload);
+            sincronizarCambios(payload);
+          }
+        )
+        .on('postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'config'
+          },
+          (payload) => {
+            exchangeRate = payload.new.exchange_rate;
+            document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
+            renderizar();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Realtime status:', status);
+          if (status === 'SUBSCRIBED') {
+            marcarOnline(true);
+            showToast('Conectado en tiempo real');
+          } else if (status === 'CHANNEL_ERROR') {
+            marcarOnline(false);
+            showToast('Error de conexión', 'error');
+          }
+        });
+    }
+
+    async function sincronizarCambios(payload) {
+      const { eventType, new: nuevo, old: viejo } = payload;
+      
+      if (eventType === 'INSERT') {
+        productos.push(nuevo);
+      } else if (eventType === 'UPDATE') {
+        const index = productos.findIndex(p => p.id === nuevo.id);
+        if (index !== -1) {
+          productos[index] = nuevo;
+        }
+      } else if (eventType === 'DELETE') {
+        productos = productos.filter(p => p.id !== viejo.id);
+      }
+      
+      renderizar();
+    }
+
+    // ============================================
+    // RENDERIZADO
+    // ============================================
+    function renderizar() {
+      const pendientes = productos.filter(p => p.status === 'pending');
+      const comprados = productos.filter(p => p.status === 'purchased');
+      
+      let html = '';
+      let totalPendiente = 0;
+      let totalComprado = 0;
+      
+      // Renderizar pendientes
+      pendientes.forEach(p => {
+        const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+        totalPendiente += subtotal;
+        html += crearItemHTML(p, subtotal);
+      });
+      
+      // Renderizar comprados
+      if (comprados.length > 0) {
+        html += '<div class="archived-section">En Carrito</div>';
+        comprados.forEach(p => {
+          const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+          totalComprado += subtotal;
+          html += crearItemHTML(p, subtotal);
+        });
+      }
+      
+      document.getElementById('listaProductos').innerHTML = html;
+      document.getElementById('totalPendiente').innerText = `$${formatear(totalPendiente)}`;
+      document.getElementById('totalComprado').innerText = `$${formatear(totalComprado)}`;
+      document.getElementById('totalBs').innerText = `Bs. ${formatear(totalComprado * exchangeRate)}`;
+      document.getElementById('contadorItems').innerText = pendientes.length;
+    }
+
+    function crearItemHTML(producto, subtotal) {
+      const esPendiente = producto.status === 'pending';
+      return `
+        <div class="product-item ${esPendiente ? '' : 'comprado'}">
+          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
+          <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
+            <div class="product-name">${escapeHtml(producto.name)}</div>
+            <div class="product-subtotal">
+              $${formatear(producto.price || 0)} × ${producto.quantity} = <b>$${formatear(subtotal)}</b>
+            </div>
+          </div>
+          <input type="text" class="price-badge" value="${formatear(producto.price || 0)}" 
+                 onchange="actualizarPrecio('${producto.id}', this.value)" onclick="event.stopPropagation()">
+          <div class="quantity-controls">
+            <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity - 1})">−</button>
+            <span class="qty-value">${producto.quantity}</span>
+            <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity + 1})">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ============================================
+    // OPERACIONES CON PRODUCTOS
+    // ============================================
+    async function nuevoProducto() {
+      const { value: nombre } = await Swal.fire({
+        title: 'Nuevo Producto',
+        input: 'text',
+        inputPlaceholder: 'Nombre del producto',
+        showCancelButton: true,
+        confirmButtonText: 'Agregar',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+          if (!value) return 'Debes escribir un nombre';
+        }
+      });
+      
+      if (nombre) {
+        showLoader(true);
+        
+        const { data, error } = await supabase
+          .from('products')
+          .insert([{
+            name: nombre,
+            price: 0,
+            quantity: 1,
+            status: 'pending'
+          }])
+          .select()
+          .single();
+        
+        showLoader(false);
+        
+        if (error) {
+          showToast('Error al agregar', 'error');
+        } else {
+          // El realtime se encargará de actualizar
+          showToast('Producto agregado');
+        }
+      }
+    }
+
+    async function actualizarPrecio(id, valor) {
+      const precio = parseFloat(valor.replace(',', '.')) || 0;
+      
+      const { error } = await supabase
+        .from('products')
+        .update({ price: precio })
+        .eq('id', id);
+      
+      if (error) {
+        showToast('Error al actualizar', 'error');
+      }
+    }
+
+    async function ajustarCantidad(id, nuevaCantidad) {
+      if (nuevaCantidad < 1) return;
+      
+      const { error } = await supabase
+        .from('products')
+        .update({ quantity: nuevaCantidad })
+        .eq('id', id);
+      
+      if (error) {
+        showToast('Error al actualizar', 'error');
+      }
+    }
+
+    async function cambiarEstado(id, estadoActual) {
+      const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
+      
+      const { error } = await supabase
+        .from('products')
+        .update({ status: nuevoEstado })
+        .eq('id', id);
+      
+      if (error) {
+        showToast('Error al actualizar', 'error');
+      }
+    }
+
+    async function borrarProducto(id, nombre) {
+      const result = await Swal.fire({
+        title: '¿Eliminar producto?',
+        text: `Se eliminará "${nombre}"`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ff3b30'
+      });
+      
+      if (result.isConfirmed) {
+        showLoader(true);
+        
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', id);
+        
+        showLoader(false);
+        
+        if (error) {
+          showToast('Error al eliminar', 'error');
+        } else {
+          showToast('Producto eliminado');
+        }
+      }
+    }
+
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    async function actualizarTasa(valor) {
+      const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
+      
+      const { error } = await supabase
+        .from('config')
+        .update({ exchange_rate: tasa })
+        .eq('id', 1);
+      
+      if (error) {
+        showToast('Error al actualizar tasa', 'error');
+      } else {
+        exchangeRate = tasa;
+        renderizar();
+        showToast('Tasa actualizada');
+      }
+    }
+
+    // ============================================
+    // ARCHIVAR
+    // ============================================
+    async function archivar() {
+      const comprados = productos.filter(p => p.status === 'purchased');
+      
+      if (comprados.length === 0) {
+        Swal.fire('Info', 'No hay productos comprados para archivar', 'info');
+        return;
+      }
+      
+      const total = comprados.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+      
+      const result = await Swal.fire({
+        title: '¿Archivar compras?',
+        text: `Se archivarán ${comprados.length} productos (Total: $${formatear(total)})`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Archivar',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (result.isConfirmed) {
+        showLoader(true);
+        
+        // Eliminar productos comprados
+        const idsAEliminar = comprados.map(p => p.id);
+        
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .in('id', idsAEliminar);
+        
+        showLoader(false);
+        
+        if (error) {
+          showToast('Error al archivar', 'error');
+        } else {
+          Swal.fire('Éxito', 'Compras archivadas', 'success');
+        }
+      }
+    }
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    function formatear(num) {
+      return (num || 0).toFixed(2).replace('.', ',');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showLoader(show) {
+      document.getElementById('loader').style.display = show ? 'block' : 'none';
+    }
+
+    function marcarOnline(status) {
+      const dot = document.getElementById('onlineStatus');
+      dot.className = `status-dot ${status ? 'online' : 'offline'}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast';
+      toast.style.background = type === 'error' ? 'rgba(255,59,48,0.9)' : 'rgba(0,0,0,0.8)';
+      toast.textContent = message;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Limpiar suscripción al cerrar
+    window.addEventListener('beforeunload', () => {
+      if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+      }
+    });
+  </script>
+</body>
+</html>
