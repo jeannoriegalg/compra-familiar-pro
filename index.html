@@ -102,6 +102,7 @@
       align-items: center;
       background: white;
       transition: all 0.2s ease;
+      position: relative;
     }
 
     .product-item:active {
@@ -116,6 +117,47 @@
     .comprado .product-name {
       color: var(--dark-green-text);
       text-decoration: line-through;
+    }
+
+    /* Animación para producto recién comprado */
+    @keyframes highlightPurchase {
+      0% { 
+        background-color: #fff3cd; 
+        transform: scale(1);
+      }
+      50% { 
+        background-color: #ffe69c; 
+        transform: scale(1.02);
+      }
+      100% { 
+        background-color: var(--soft-green-bg); 
+        transform: scale(1);
+      }
+    }
+
+    .product-item.just-purchased {
+      animation: highlightPurchase 3s ease-out;
+      border-left: 4px solid #ffc107;
+    }
+
+    /* Badge de "Recién agregado" */
+    .just-added-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ffc107;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      animation: fadeOut 3s ease-out 2s forwards;
+      z-index: 10;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
     }
 
     .product-img {
@@ -314,46 +356,6 @@
       margin-top: 8px;
     }
 
-    /* Historial de compras */
-    .history-section {
-      background: #f0f0f2;
-      padding: 16px;
-      margin-top: 20px;
-      border-radius: 12px;
-      margin: 16px;
-    }
-
-    .history-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .history-item {
-      background: white;
-      padding: 10px 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .history-date {
-      color: var(--text-gray);
-      font-size: 11px;
-    }
-
-    .history-total {
-      font-weight: 700;
-      color: var(--primary-green);
-    }
-
     /* Responsive */
     @media (max-width: 480px) {
       .product-item {
@@ -402,7 +404,49 @@
       100% { opacity: 0; transform: translateY(-10px); }
     }
 
-    /* Botón ver historial */
+    /* Toast para compra */
+    .toast-purchase {
+      background: rgba(40, 167, 69, 0.95);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .toast-purchase .undo-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .toast-purchase .undo-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    @keyframes slideIn {
+      from { 
+        transform: translateY(-20px); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateY(0); 
+        opacity: 1; 
+      }
+    }
+
+    /* Botón Historial */
     .btn-history {
       position: fixed;
       bottom: 100px;
@@ -479,7 +523,7 @@
     // ============================================
     // CONFIGURACIÓN DE SUPABASE
     // ============================================
-    const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
+   const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -487,6 +531,8 @@
     let productos = [];
     let exchangeRate = 36.50;
     let realtimeChannel = null;
+    let ultimoProductoComprado = null;
+    let timeoutHighlight = null;
 
     // ============================================
     // INICIALIZACIÓN
@@ -610,7 +656,7 @@
       pendientes.forEach(p => {
         const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
         totalPendiente += subtotal;
-        html += crearItemHTML(p, subtotal);
+        html += crearItemHTML(p, subtotal, false);
       });
       
       // Renderizar comprados
@@ -619,7 +665,9 @@
         comprados.forEach(p => {
           const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
           totalComprado += subtotal;
-          html += crearItemHTML(p, subtotal);
+          // Marcar el último comprado
+          const esUltimo = (p.id === ultimoProductoComprado);
+          html += crearItemHTML(p, subtotal, esUltimo);
         });
       }
       
@@ -627,7 +675,7 @@
       if (productos.length === 0) {
         html = `
           <div style="text-align: center; padding: 40px 20px; color: var(--text-gray);">
-            <div style="font-size: 48px; margin-bottom: 16px;"></div>
+            <div style="font-size: 48px; margin-bottom: 16px;">🛒</div>
             <div style="font-size: 16px; font-weight: 600;">Tu lista está vacía</div>
             <div style="font-size: 14px; margin-top: 8px;">Presiona + para agregar productos</div>
           </div>
@@ -639,12 +687,30 @@
       document.getElementById('totalComprado').innerText = `$${formatear(totalComprado)}`;
       document.getElementById('totalBs').innerText = `Bs. ${formatear(totalComprado * exchangeRate)}`;
       document.getElementById('contadorItems').innerText = pendientes.length;
+      
+      // Limpiar el highlight después de 3 segundos
+      if (timeoutHighlight) {
+        clearTimeout(timeoutHighlight);
+      }
+      
+      timeoutHighlight = setTimeout(() => {
+        ultimoProductoComprado = null;
+        // Re-renderizar sin highlight si es necesario
+        const hayComprados = productos.some(p => p.status === 'purchased');
+        if (hayComprados) {
+          renderizar();
+        }
+      }, 3000);
     }
 
-    function crearItemHTML(producto, subtotal) {
+    function crearItemHTML(producto, subtotal, esUltimoComprado = false) {
       const esPendiente = producto.status === 'pending';
+      const claseExtra = esUltimoComprado ? 'just-purchased' : '';
+      const badgeExtra = esUltimoComprado ? '<span class="just-added-badge">¡Nuevo!</span>' : '';
+      
       return `
-        <div class="product-item ${esPendiente ? '' : 'comprado'}">
+        <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative;">
+          ${badgeExtra}
           <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
           <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
             <div class="product-name">${escapeHtml(producto.name)}</div>
@@ -732,16 +798,86 @@
       }
     }
 
+    // ============================================
+    // CAMBIAR ESTADO CON HIGHLIGHT Y UNDO
+    // ============================================
     async function cambiarEstado(id, estadoActual) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+      
       const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
       
-      const { error } = await supabaseClient
-        .from('products')
-        .update({ status: nuevoEstado })
-        .eq('id', id);
-      
-      if (error) {
+      try {
+        const { error } = await supabaseClient
+          .from('products')
+          .update({ status: nuevoEstado })
+          .eq('id', id);
+        
+        if (error) {
+          showToast('Error al actualizar', 'error');
+          return;
+        }
+        
+        // Si se marcó como comprado, mostrar highlight y notificación
+        if (nuevoEstado === 'purchased') {
+          ultimoProductoComprado = id;
+          
+          // Limpiar timeout anterior si existe
+          if (timeoutHighlight) {
+            clearTimeout(timeoutHighlight);
+          }
+          
+          // Mostrar notificación con undo
+          mostrarNotificacionConUndo(producto.name, id);
+        }
+        
+      } catch (error) {
+        console.error('Error:', error);
         showToast('Error al actualizar', 'error');
+      }
+    }
+
+    // Mostrar notificación con botón deshacer
+    function mostrarNotificacionConUndo(nombreProducto, productId) {
+      const container = document.getElementById('toastContainer');
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast-purchase';
+      toast.innerHTML = `
+        <span>✓ <b>${escapeHtml(nombreProducto)}</b> agregado al carrito</span>
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">
+          ↶ Deshacer
+        </button>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Auto-eliminar después de 5 segundos
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 5000);
+    }
+
+    // Función para deshacer
+    async function deshacerUltimaCompra(productId) {
+      try {
+        const { error } = await supabaseClient
+          .from('products')
+          .update({ status: 'pending' })
+          .eq('id', productId);
+        
+        if (error) throw error;
+        
+        showToast('Producto devuelto a pendientes');
+        
+        // Limpiar notificaciones
+        const toasts = document.querySelectorAll('.toast-purchase');
+        toasts.forEach(t => t.remove());
+        
+      } catch (error) {
+        showToast('Error al deshacer', 'error');
       }
     }
 
