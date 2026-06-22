@@ -411,10 +411,12 @@
     // ============================================
     // CONFIGURACIÓN DE SUPABASE
     // ============================================
+    // ⚠️ REEMPLAZA ESTOS VALORES CON LOS TUYOS
     const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Crear cliente de Supabase (usando window.supabase para evitar conflicto)
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let productos = [];
     let exchangeRate = 36.50;
@@ -433,7 +435,7 @@
       
       try {
         // Cargar configuración
-        const { data: configData, error: configError } = await supabase
+        const { data: configData, error: configError } = await supabaseClient
           .from('config')
           .select('exchange_rate')
           .single();
@@ -443,7 +445,7 @@
         document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
         
         // Cargar productos
-        const { data: productsData, error: productsError } = await supabase
+        const { data: productsData, error: productsError } = await supabaseClient
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
@@ -466,7 +468,7 @@
     // REALTIME SUBSCRIPTION
     // ============================================
     function suscribirseACambios() {
-      realtimeChannel = supabase
+      realtimeChannel = supabaseClient
         .channel('shopping-changes')
         .on('postgres_changes', 
           { 
@@ -596,7 +598,7 @@
       if (nombre) {
         showLoader(true);
         
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('products')
           .insert([{
             name: nombre,
@@ -612,7 +614,6 @@
         if (error) {
           showToast('Error al agregar', 'error');
         } else {
-          // El realtime se encargará de actualizar
           showToast('Producto agregado');
         }
       }
@@ -621,7 +622,7 @@
     async function actualizarPrecio(id, valor) {
       const precio = parseFloat(valor.replace(',', '.')) || 0;
       
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('products')
         .update({ price: precio })
         .eq('id', id);
@@ -634,7 +635,7 @@
     async function ajustarCantidad(id, nuevaCantidad) {
       if (nuevaCantidad < 1) return;
       
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('products')
         .update({ quantity: nuevaCantidad })
         .eq('id', id);
@@ -647,7 +648,7 @@
     async function cambiarEstado(id, estadoActual) {
       const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
       
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('products')
         .update({ status: nuevoEstado })
         .eq('id', id);
@@ -671,7 +672,7 @@
       if (result.isConfirmed) {
         showLoader(true);
         
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('products')
           .delete()
           .eq('id', id);
@@ -692,7 +693,7 @@
     async function actualizarTasa(valor) {
       const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
       
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('config')
         .update({ exchange_rate: tasa })
         .eq('id', 1);
@@ -731,10 +732,9 @@
       if (result.isConfirmed) {
         showLoader(true);
         
-        // Eliminar productos comprados
         const idsAEliminar = comprados.map(p => p.id);
         
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('products')
           .delete()
           .in('id', idsAEliminar);
@@ -788,7 +788,7 @@
     // Limpiar suscripción al cerrar
     window.addEventListener('beforeunload', () => {
       if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
+        supabaseClient.removeChannel(realtimeChannel);
       }
     });
   </script>
