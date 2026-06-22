@@ -314,6 +314,46 @@
       margin-top: 8px;
     }
 
+    /* Historial de compras */
+    .history-section {
+      background: #f0f0f2;
+      padding: 16px;
+      margin-top: 20px;
+      border-radius: 12px;
+      margin: 16px;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item {
+      background: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-date {
+      color: var(--text-gray);
+      font-size: 11px;
+    }
+
+    .history-total {
+      font-weight: 700;
+      color: var(--primary-green);
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .product-item {
@@ -361,6 +401,31 @@
       90% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-10px); }
     }
+
+    /* Botón ver historial */
+    .btn-history {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      width: 48px;
+      height: 48px;
+      background: var(--primary-blue);
+      color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-history:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 <body>
@@ -393,6 +458,9 @@
   <!-- FAB Button -->
   <button class="btn-fab" onclick="nuevoProducto()">+</button>
 
+  <!-- Botón Historial -->
+  <button class="btn-history" onclick="mostrarHistorial()" title="Ver historial">📋</button>
+
   <!-- Footer -->
   <div class="footer-resumen">
     <div class="total-box">
@@ -401,7 +469,7 @@
     </div>
     <div class="divider"></div>
     <div class="total-box" onclick="archivar()">
-      <span class="total-label">Carrito (Archivar)</span>
+      <span class="total-label">Archivar Compra</span>
       <span id="totalComprado" class="total-val" style="color: var(--primary-green);">$0,00</span>
       <small id="totalBs" class="text-muted fw-bold" style="font-size: 10px; display: block; margin-top: 2px;">Bs. 0,00</small>
     </div>
@@ -411,11 +479,9 @@
     // ============================================
     // CONFIGURACIÓN DE SUPABASE
     // ============================================
-    // ⚠️ REEMPLAZA ESTOS VALORES CON LOS TUYOS
-    const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
+    const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
+    const SUPABASE_ANON_KEY = 'TU_ANON_KEY';
     
-    // Crear cliente de Supabase (usando window.supabase para evitar conflicto)
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let productos = [];
@@ -523,11 +589,18 @@
     }
 
     // ============================================
-    // RENDERIZADO
+    // RENDERIZADO CON ORDENAMIENTO ALFABÉTICO
     // ============================================
     function renderizar() {
-      const pendientes = productos.filter(p => p.status === 'pending');
-      const comprados = productos.filter(p => p.status === 'purchased');
+      // Ordenar alfabéticamente por nombre
+      const productosOrdenados = [...productos].sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+      });
+      
+      const pendientes = productosOrdenados.filter(p => p.status === 'pending');
+      const comprados = productosOrdenados.filter(p => p.status === 'purchased');
       
       let html = '';
       let totalPendiente = 0;
@@ -548,6 +621,17 @@
           totalComprado += subtotal;
           html += crearItemHTML(p, subtotal);
         });
+      }
+      
+      // Mostrar mensaje si no hay productos
+      if (productos.length === 0) {
+        html = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-gray);">
+            <div style="font-size: 48px; margin-bottom: 16px;"></div>
+            <div style="font-size: 16px; font-weight: 600;">Tu lista está vacía</div>
+            <div style="font-size: 14px; margin-top: 8px;">Presiona + para agregar productos</div>
+          </div>
+        `;
       }
       
       document.getElementById('listaProductos').innerHTML = html;
@@ -598,23 +682,26 @@
       if (nombre) {
         showLoader(true);
         
-        const { data, error } = await supabaseClient
-          .from('products')
-          .insert([{
-            name: nombre,
-            price: 0,
-            quantity: 1,
-            status: 'pending'
-          }])
-          .select()
-          .single();
-        
-        showLoader(false);
-        
-        if (error) {
-          showToast('Error al agregar', 'error');
-        } else {
+        try {
+          const { data, error } = await supabaseClient
+            .from('products')
+            .insert([{
+              name: nombre.trim(),
+              price: 0,
+              quantity: 1,
+              status: 'pending'
+            }])
+            .select()
+            .single();
+          
+          if (error) throw error;
+          
           showToast('Producto agregado');
+        } catch (error) {
+          console.error('Error:', error);
+          showToast('Error al agregar', 'error');
+        } finally {
+          showLoader(false);
         }
       }
     }
@@ -661,7 +748,7 @@
     async function borrarProducto(id, nombre) {
       const result = await Swal.fire({
         title: '¿Eliminar producto?',
-        text: `Se eliminará "${nombre}"`,
+        text: `Se eliminará "${nombre}" permanentemente`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
@@ -688,6 +775,176 @@
     }
 
     // ============================================
+    // ARCHIVAR COMPRA (Sin eliminar productos)
+    // ============================================
+    async function archivar() {
+      const comprados = productos.filter(p => p.status === 'purchased');
+      
+      if (comprados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'No hay productos en el carrito',
+          text: 'Marca productos como comprados para archivar',
+          confirmButtonColor: '#007aff'
+        });
+        return;
+      }
+      
+      const total = comprados.reduce((sum, p) => sum + ((p.price || 0) * (p.quantity || 1)), 0);
+      
+      const result = await Swal.fire({
+        title: '¿Archivar compra?',
+        html: `
+          <div style="text-align: left; margin-top: 12px;">
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <b>${comprados.length} productos</b> serán archivados
+            </div>
+            <div style="font-size: 14px;">
+              Total: <b style="color: #28a745;">$${formatear(total)}</b>
+            </div>
+            <div style="font-size: 12px; color: #888; margin-top: 8px;">
+              Los productos permanecerán en tu lista como pendientes para futuras compras
+            </div>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Archivar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745'
+      });
+      
+      if (result.isConfirmed) {
+        showLoader(true);
+        
+        try {
+          // 1. Guardar en historial
+          const historialItems = comprados.map(p => ({
+            product_name: p.name,
+            price: p.price || 0,
+            quantity: p.quantity || 1,
+            total: (p.price || 0) * (p.quantity || 1)
+          }));
+          
+          const { error: historyError } = await supabaseClient
+            .from('purchase_history')
+            .insert(historialItems);
+          
+          if (historyError) throw historyError;
+          
+          // 2. Cambiar estado de vuelta a pending (mantener en la lista)
+          const idsComprados = comprados.map(p => p.id);
+          const { error: updateError } = await supabaseClient
+            .from('products')
+            .update({ status: 'pending' })
+            .in('id', idsComprados);
+          
+          if (updateError) throw updateError;
+          
+          showLoader(false);
+          
+          Swal.fire({
+            icon: 'success',
+            title: '¡Compra archivada!',
+            text: `Se archivó $${formatear(total)} en Bs. ${formatear(total * exchangeRate)}`,
+            confirmButtonColor: '#28a745'
+          });
+          
+        } catch (error) {
+          console.error('Error al archivar:', error);
+          showLoader(false);
+          showToast('Error al archivar', 'error');
+        }
+      }
+    }
+
+    // ============================================
+    // MOSTRAR HISTORIAL
+    // ============================================
+    async function mostrarHistorial() {
+      showLoader(true);
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('purchase_history')
+          .select('*')
+          .order('archived_date', { ascending: false })
+          .limit(50);
+        
+        showLoader(false);
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Sin historial',
+            text: 'Aún no has archivado ninguna compra',
+            confirmButtonColor: '#007aff'
+          });
+          return;
+        }
+        
+        // Agrupar por fecha
+        const comprasPorFecha = {};
+        data.forEach(item => {
+          const fecha = new Date(item.archived_date).toLocaleDateString('es-ES');
+          if (!comprasPorFecha[fecha]) {
+            comprasPorFecha[fecha] = { items: [], total: 0 };
+          }
+          comprasPorFecha[fecha].items.push(item);
+          comprasPorFecha[fecha].total += item.total;
+        });
+        
+        let html = '<div style="text-align: left; max-height: 60vh; overflow-y: auto;">';
+        
+        Object.keys(comprasPorFecha).forEach(fecha => {
+          const compra = comprasPorFecha[fecha];
+          html += `
+            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
+                📅 ${fecha}
+              </div>
+              <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
+                ${compra.items.length} productos
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #888;">Total</span>
+                <span style="font-weight: 700; color: #28a745;">$${formatear(compra.total)}</span>
+              </div>
+              <details style="margin-top: 8px;">
+                <summary style="font-size: 12px; color: #007aff; cursor: pointer;">Ver detalles</summary>
+                <div style="margin-top: 8px; font-size: 12px;">
+                  ${compra.items.map(item => `
+                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0;">
+                      <span>${item.product_name} x${item.quantity}</span>
+                      <span>$${formatear(item.total)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </details>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        
+        Swal.fire({
+          title: '📋 Historial de Compras',
+          html: html,
+          width: 600,
+          confirmButtonText: 'Cerrar',
+          confirmButtonColor: '#007aff'
+        });
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showLoader(false);
+        showToast('Error al cargar historial', 'error');
+      }
+    }
+
+    // ============================================
     // CONFIGURACIÓN
     // ============================================
     async function actualizarTasa(valor) {
@@ -704,48 +961,6 @@
         exchangeRate = tasa;
         renderizar();
         showToast('Tasa actualizada');
-      }
-    }
-
-    // ============================================
-    // ARCHIVAR
-    // ============================================
-    async function archivar() {
-      const comprados = productos.filter(p => p.status === 'purchased');
-      
-      if (comprados.length === 0) {
-        Swal.fire('Info', 'No hay productos comprados para archivar', 'info');
-        return;
-      }
-      
-      const total = comprados.reduce((sum, p) => sum + (p.price * p.quantity), 0);
-      
-      const result = await Swal.fire({
-        title: '¿Archivar compras?',
-        text: `Se archivarán ${comprados.length} productos (Total: $${formatear(total)})`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Archivar',
-        cancelButtonText: 'Cancelar'
-      });
-      
-      if (result.isConfirmed) {
-        showLoader(true);
-        
-        const idsAEliminar = comprados.map(p => p.id);
-        
-        const { error } = await supabaseClient
-          .from('products')
-          .delete()
-          .in('id', idsAEliminar);
-        
-        showLoader(false);
-        
-        if (error) {
-          showToast('Error al archivar', 'error');
-        } else {
-          Swal.fire('Éxito', 'Compras archivadas', 'success');
-        }
       }
     }
 
