@@ -35,14 +35,9 @@
     }
 
     .navbar-custom {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: white;
+      position: sticky; top: 0; z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: white;
       border-bottom: 1px solid var(--border-color);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
@@ -54,7 +49,6 @@
     }
 
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
     .online { background-color: var(--primary-green); }
     .offline { background-color: var(--primary-red); }
 
@@ -130,26 +124,27 @@
 
     .product-subtotal { font-size: 12px; color: var(--text-gray); }
 
+    /* 🔧 Precio ahora es un botón clickeable, no un input */
     .price-badge {
       background: rgba(255, 59, 48, 0.08);
       color: var(--primary-red);
-      border: 2px solid transparent;
+      border: none;
       border-radius: 8px;
       font-weight: 700;
       font-size: 14px;
-      width: 80px;
+      min-width: 75px;
       text-align: center;
-      padding: 8px 4px;
+      padding: 8px 8px;
       margin: 0 8px;
-      -webkit-appearance: none;
-      appearance: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .price-badge:focus {
-      outline: none;
-      border-color: var(--primary-blue);
-      background: white;
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    .price-badge:active {
+      background: rgba(255, 59, 48, 0.15);
+      transform: scale(0.95);
     }
 
     .comprado .price-badge {
@@ -237,7 +232,7 @@
     @media (max-width: 480px) {
       .product-item { padding: 12px; }
       .product-name { font-size: 14px; }
-      .price-badge { width: 70px; font-size: 13px; }
+      .price-badge { min-width: 70px; font-size: 13px; padding: 6px 6px; }
       .qty-btn { width: 28px; height: 28px; font-size: 16px; }
     }
 
@@ -289,6 +284,17 @@
     }
 
     .btn-history:active { transform: scale(0.95); }
+
+    /* 🔧 Estilos del modal de precio */
+    .price-modal-hint {
+      background: #f0f8ff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #007aff;
+      margin-top: 8px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -338,10 +344,7 @@
     let realtimeChannel = null;
     let ultimoProductoComprado = null;
     let timeoutHighlight = null;
-    
-    // 🔧 Variables para controlar edición de precios
-    let precioEnEdicion = null;
-    let valorEnEdicion = null;
+    let modalAbierto = false; // 🔧 Evita re-renderizar mientras hay un modal abierto
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarDatosIniciales();
@@ -350,29 +353,22 @@
 
     async function cargarDatosIniciales() {
       showLoader(true);
-      
       try {
         const { data: configData, error: configError } = await supabaseClient
-          .from('config')
-          .select('exchange_rate')
-          .single();
-        
+          .from('config').select('exchange_rate').single();
         if (configError) throw configError;
         exchangeRate = configData?.exchange_rate || 36.50;
         document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
         
         const { data: productsData, error: productsError } = await supabaseClient
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
+          .from('products').select('*').order('created_at', { ascending: false });
         if (productsError) throw productsError;
         productos = productsData || [];
         
         renderizar();
         showToast('Sincronizado');
       } catch (error) {
-        console.error('Error cargando datos:', error);
+        console.error('Error:', error);
         showToast('Error de conexión', 'error');
         marcarOnline(false);
       } finally {
@@ -383,54 +379,44 @@
     function suscribirseACambios() {
       realtimeChannel = supabaseClient
         .channel('shopping-changes')
-        .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'products' }, 
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, 
           (payload) => {
-            // 🔧 Si estamos editando un precio, ignorar cambios del realtime
-            if (precioEnEdicion) {
-              console.log('Cambio ignorado durante edición');
+            // 🔧 Si hay un modal abierto, guardar el cambio para después
+            if (modalAbierto) {
+              console.log('Cambio guardado para después (modal abierto)');
               return;
             }
             sincronizarCambios(payload);
           }
         )
-        .on('postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'config' },
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' },
           (payload) => {
             exchangeRate = payload.new.exchange_rate;
             document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
-            renderizar();
+            if (!modalAbierto) renderizar();
           }
         )
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            marcarOnline(true);
-          } else if (status === 'CHANNEL_ERROR') {
-            marcarOnline(false);
-          }
+          if (status === 'SUBSCRIBED') marcarOnline(true);
+          else if (status === 'CHANNEL_ERROR') marcarOnline(false);
         });
     }
 
     async function sincronizarCambios(payload) {
       const { eventType, new: nuevo, old: viejo } = payload;
-      
-      if (eventType === 'INSERT') {
-        productos.push(nuevo);
-      } else if (eventType === 'UPDATE') {
+      if (eventType === 'INSERT') productos.push(nuevo);
+      else if (eventType === 'UPDATE') {
         const index = productos.findIndex(p => p.id === nuevo.id);
         if (index !== -1) productos[index] = nuevo;
       } else if (eventType === 'DELETE') {
         productos = productos.filter(p => p.id !== viejo.id);
       }
-      
       renderizar();
     }
 
     function renderizar() {
       const productosOrdenados = [...productos].sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'es', { sensitivity: 'base' });
       });
       
       const pendientes = productosOrdenados.filter(p => p.status === 'pending');
@@ -451,8 +437,7 @@
         comprados.forEach(p => {
           const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
           totalComprado += subtotal;
-          const esUltimo = (p.id === ultimoProductoComprado);
-          html += crearItemHTML(p, subtotal, esUltimo);
+          html += crearItemHTML(p, subtotal, p.id === ultimoProductoComprado);
         });
       }
       
@@ -462,8 +447,7 @@
             <div style="font-size: 48px; margin-bottom: 16px;">🛒</div>
             <div style="font-size: 16px; font-weight: 600;">Tu lista está vacía</div>
             <div style="font-size: 14px; margin-top: 8px;">Presiona + para agregar productos</div>
-          </div>
-        `;
+          </div>`;
       }
       
       document.getElementById('listaProductos').innerHTML = html;
@@ -473,11 +457,9 @@
       document.getElementById('contadorItems').innerText = pendientes.length;
       
       if (timeoutHighlight) clearTimeout(timeoutHighlight);
-      
       timeoutHighlight = setTimeout(() => {
         ultimoProductoComprado = null;
-        const hayComprados = productos.some(p => p.status === 'purchased');
-        if (hayComprados) renderizar();
+        if (productos.some(p => p.status === 'purchased')) renderizar();
       }, 3000);
     }
 
@@ -496,66 +478,104 @@
               $${formatear(producto.price || 0)} × ${producto.quantity} = <b>$${formatear(subtotal)}</b>
             </div>
           </div>
-          <input 
-            type="text" 
-            id="price-${producto.id}"
-            class="price-badge" 
-            value="${formatear(producto.price || 0)}" 
-            inputmode="decimal"
-            pattern="[0-9.,]*"
-            autocomplete="off"
-            onfocus="iniciarEdicionPrecio('${producto.id}')"
-            onblur="finalizarEdicionPrecio('${producto.id}', this.value)"
-            ondblclick="abrirCalculadoraPrecio(event, '${producto.id}')"
-            onclick="event.stopPropagation()"
-          >
+          <div class="price-badge" onclick="editarPrecio('${producto.id}')">
+            $${formatear(producto.price || 0)}
+          </div>
           <div class="quantity-controls">
             <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity - 1})">−</button>
             <span class="qty-value">${producto.quantity}</span>
             <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity + 1})">+</button>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    // 🔧 Funciones para controlar edición de precio
-    function iniciarEdicionPrecio(id) {
-      precioEnEdicion = id;
-      const input = document.getElementById(`price-${id}`);
-      if (input) valorEnEdicion = input.value;
-    }
-
-    function finalizarEdicionPrecio(id, valor) {
-      precioEnEdicion = null;
-      actualizarPrecio(id, valor);
-    }
-
-    // 🧮 Calculadora de precios con doble tap
-    async function abrirCalculadoraPrecio(event, productId) {
-      event.stopPropagation();
-      event.preventDefault();
-      
+    // ============================================
+    // 🔧 EDITAR PRECIO CON MODAL (TECLADO FIJO)
+    // ============================================
+    async function editarPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
       if (!producto) return;
       
-      const { value: expresion } = await Swal.fire({
-        title: '💰 Calculadora de Precio',
+      modalAbierto = true;
+      
+      const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
+        title: '💲 Editar Precio',
         html: `
-          <div style="text-align: left; margin-bottom: 12px;">
-            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
-              Producto: <b>${escapeHtml(producto.name)}</b>
-            </div>
-            <div style="font-size: 12px; color: #888;">
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: #1d1d1f;">${escapeHtml(producto.name)}</div>
+            <div style="font-size: 12px; color: #888; margin-top: 4px;">
               Precio actual: <b>$${formatear(producto.price || 0)}</b>
             </div>
           </div>
-          <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Ejemplos:</div>
-            <div style="font-size: 12px; color: #333;">
-              • 1.2+1.5+2.3 = 5.00<br>
-              • 10*2 = 20.00<br>
-              • 50-10 = 40.00<br>
-              • 100/4 = 25.00
+        `,
+        input: 'text',
+        inputValue: formatear(producto.price || 0),
+        inputAttributes: {
+          'inputmode': 'decimal',
+          'enterkeyhint': 'done',
+          'autocomplete': 'off',
+          'autocapitalize': 'off',
+          'spellcheck': 'false'
+        },
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') return 'Ingresa un precio';
+          const num = parseFloat(value.replace(',', '.'));
+          if (isNaN(num)) return 'Precio inválido';
+          if (num < 0) return 'El precio no puede ser negativo';
+        },
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '✓ Guardar',
+        denyButtonText: '🧮 Calculadora',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        denyButtonColor: '#007aff',
+        cancelButtonColor: '#8e8e93',
+        allowOutsideClick: false,
+        allowEscapeKey: true
+      });
+      
+      modalAbierto = false;
+      
+      // 🔧 Si presionó "Calculadora"
+      if (isDenied) {
+        await abrirCalculadoraPrecio(productId);
+        return;
+      }
+      
+      // 🔧 Si presionó "Guardar"
+      if (isConfirmed && resultado) {
+        const precio = parseFloat(resultado.replace(',', '.')) || 0;
+        await guardarPrecio(productId, precio);
+      }
+      
+      // 🔧 Sincronizar cualquier cambio pendiente
+      await recargarDatos();
+    }
+
+    // ============================================
+    // 🧮 CALCULADORA DE PRECIOS
+    // ============================================
+    async function abrirCalculadoraPrecio(productId) {
+      const producto = productos.find(p => p.id === productId);
+      if (!producto) return;
+      
+      modalAbierto = true;
+      
+      const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
+        title: '🧮 Calculadora',
+        html: `
+          <div style="text-align: left; margin-bottom: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: #1d1d1f; margin-bottom: 4px;">
+              ${escapeHtml(producto.name)}
+            </div>
+            <div style="background: #f0f8ff; padding: 10px; border-radius: 8px; font-size: 12px; color: #007aff;">
+              <b>Ejemplos válidos:</b><br>
+              • <code>1.2+1.5+2.3</code> → <b>5.00</b><br>
+              • <code>10*2</code> → <b>20.00</b><br>
+              • <code>50-10</code> → <b>40.00</b><br>
+              • <code>100/4</code> → <b>25.00</b><br>
+              • <code>(10+5)*2</code> → <b>30.00</b>
             </div>
           </div>
         `,
@@ -563,70 +583,119 @@
         inputPlaceholder: 'Ej: 1.2+1.5+2.3',
         inputAttributes: {
           'inputmode': 'decimal',
-          'autocomplete': 'off'
+          'enterkeyhint': 'done',
+          'autocomplete': 'off',
+          'autocapitalize': 'off',
+          'spellcheck': 'false'
         },
-        showCancelButton: true,
-        confirmButtonText: 'Calcular y Asignar',
-        cancelButtonText: 'Cancelar',
         inputValidator: (value) => {
-          if (!value) return 'Ingresa una expresión matemática';
-          
-          // Validar que solo contenga números, operadores y decimales
-          if (!/^[\d+\-*/().,\s]+$/.test(value)) {
-            return 'Solo se permiten números y operadores (+, -, *, /)';
-          }
-          
+          if (!value || value.trim() === '') return 'Ingresa una expresión';
           try {
-            const resultado = evaluarExpresion(value);
-            if (isNaN(resultado) || !isFinite(resultado)) {
-              return 'Expresión inválida';
-            }
+            const r = evaluarExpresion(value);
+            if (isNaN(r) || !isFinite(r)) return 'Expresión inválida';
+            if (r < 0) return 'El resultado no puede ser negativo';
           } catch (e) {
             return 'Error en la expresión';
           }
         },
-        preConfirm: (value) => {
-          const resultado = evaluarExpresion(value);
-          return { expresion: value, resultado: resultado };
-        }
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '✓ Asignar Resultado',
+        denyButtonText: '← Volver',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        denyButtonColor: '#8e8e93',
+        cancelButtonColor: '#ff3b30',
+        allowOutsideClick: false
       });
       
-      if (expresion) {
-        const resultadoFinal = expresion.resultado;
-        
-        // Actualizar en Supabase
-        const { error } = await supabaseClient
-          .from('products')
-          .update({ price: resultadoFinal })
-          .eq('id', productId);
-        
-        if (error) {
-          showToast('Error al actualizar', 'error');
-        } else {
-          showToast(`Precio actualizado: $${formatear(resultadoFinal)}`);
+      modalAbierto = false;
+      
+      if (isDenied) {
+        // Volver al modal de precio
+        await editarPrecio(productId);
+        return;
+      }
+      
+      if (isConfirmed && resultado) {
+        try {
+          const precioFinal = evaluarExpresion(resultado);
+          
+          // Mostrar confirmación del cálculo
+          const confirmar = await Swal.fire({
+            title: '¿Asignar este precio?',
+            html: `
+              <div style="font-size: 14px;">
+                <div style="color: #888; margin-bottom: 4px;">Expresión:</div>
+                <div style="font-family: monospace; background: #f5f5f7; padding: 8px; border-radius: 6px; margin-bottom: 12px;">
+                  ${resultado} = <b>$${formatear(precioFinal)}</b>
+                </div>
+                <div style="color: #888;">Producto: <b>${escapeHtml(producto.name)}</b></div>
+              </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, asignar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#28a745'
+          });
+          
+          if (confirmar.isConfirmed) {
+            await guardarPrecio(productId, precioFinal);
+            showToast(`Precio: $${formatear(precioFinal)}`);
+          } else {
+            // Si canceló, volver a la calculadora
+            await abrirCalculadoraPrecio(productId);
+            return;
+          }
+        } catch (e) {
+          showToast('Error en la expresión', 'error');
+          await abrirCalculadoraPrecio(productId);
+          return;
         }
+      }
+      
+      await recargarDatos();
+    }
+
+    async function guardarPrecio(productId, precio) {
+      const { error } = await supabaseClient
+        .from('products')
+        .update({ price: precio })
+        .eq('id', productId);
+      
+      if (error) {
+        showToast('Error al actualizar', 'error');
+      } else {
+        showToast(`Precio actualizado: $${formatear(precio)}`);
       }
     }
 
-    // Función para evaluar expresiones matemáticas de forma segura
     function evaluarExpresion(expresion) {
-      // Reemplazar comas por puntos
       let expr = expresion.replace(/,/g, '.');
-      
-      // Validar caracteres permitidos
       if (!/^[\d+\-*/().\s]+$/.test(expr)) {
         throw new Error('Caracteres no permitidos');
       }
-      
-      // Usar Function constructor para evaluar (más seguro que eval directo)
+      const resultado = new Function('return ' + expr)();
+      return Math.round(resultado * 100) / 100;
+    }
+
+    async function recargarDatos() {
       try {
-        const resultado = new Function('return ' + expr)();
-        return Math.round(resultado * 100) / 100; // Redondear a 2 decimales
+        const { data, error } = await supabaseClient
+          .from('products').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+          productos = data;
+          renderizar();
+        }
       } catch (e) {
-        throw new Error('Expresión inválida');
+        console.error('Error recargando:', e);
       }
     }
 
+    // ============================================
+    // OTRAS OPERACIONES
+    // ============================================
     async function nuevoProducto() {
       const { value: nombre } = await Swal.fire({
         title: 'Nuevo Producto',
@@ -635,30 +704,19 @@
         showCancelButton: true,
         confirmButtonText: 'Agregar',
         cancelButtonText: 'Cancelar',
-        inputValidator: (value) => {
-          if (!value) return 'Debes escribir un nombre';
-        }
+        inputValidator: (value) => { if (!value) return 'Escribe un nombre'; }
       });
       
       if (nombre) {
         showLoader(true);
-        
         try {
-          const { data, error } = await supabaseClient
+          const { error } = await supabaseClient
             .from('products')
-            .insert([{
-              name: nombre.trim(),
-              price: 0,
-              quantity: 1,
-              status: 'pending'
-            }])
-            .select()
-            .single();
-          
+            .insert([{ name: nombre.trim(), price: 0, quantity: 1, status: 'pending' }]);
           if (error) throw error;
           showToast('Producto agregado');
+          await recargarDatos();
         } catch (error) {
-          console.error('Error:', error);
           showToast('Error al agregar', 'error');
         } finally {
           showLoader(false);
@@ -666,44 +724,24 @@
       }
     }
 
-    async function actualizarPrecio(id, valor) {
-      const precio = parseFloat(valor.replace(',', '.')) || 0;
-      
-      const { error } = await supabaseClient
-        .from('products')
-        .update({ price: precio })
-        .eq('id', id);
-      
-      if (error) showToast('Error al actualizar', 'error');
-    }
-
     async function ajustarCantidad(id, nuevaCantidad) {
       if (nuevaCantidad < 1) return;
-      
       const { error } = await supabaseClient
         .from('products')
         .update({ quantity: nuevaCantidad })
         .eq('id', id);
-      
       if (error) showToast('Error al actualizar', 'error');
     }
 
     async function cambiarEstado(id, estadoActual) {
       const producto = productos.find(p => p.id === id);
       if (!producto) return;
-      
       const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
       
       try {
         const { error } = await supabaseClient
-          .from('products')
-          .update({ status: nuevoEstado })
-          .eq('id', id);
-        
-        if (error) {
-          showToast('Error al actualizar', 'error');
-          return;
-        }
+          .from('products').update({ status: nuevoEstado }).eq('id', id);
+        if (error) { showToast('Error', 'error'); return; }
         
         if (nuevoEstado === 'purchased') {
           ultimoProductoComprado = id;
@@ -711,31 +749,24 @@
           mostrarNotificacionConUndo(producto.name, id);
         }
       } catch (error) {
-        console.error('Error:', error);
-        showToast('Error al actualizar', 'error');
+        showToast('Error', 'error');
       }
     }
 
-    function mostrarNotificacionConUndo(nombreProducto, productId) {
+    function mostrarNotificacionConUndo(nombre, productId) {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = 'toast-purchase';
       toast.innerHTML = `
-        <span>✓ <b>${escapeHtml(nombreProducto)}</b> agregado al carrito</span>
-        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶ Deshacer</button>
-      `;
+        <span>✓ <b>${escapeHtml(nombre)}</b> agregado al carrito</span>
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶ Deshacer</button>`;
       container.appendChild(toast);
       setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
     }
 
     async function deshacerUltimaCompra(productId) {
       try {
-        const { error } = await supabaseClient
-          .from('products')
-          .update({ status: 'pending' })
-          .eq('id', productId);
-        
-        if (error) throw error;
+        await supabaseClient.from('products').update({ status: 'pending' }).eq('id', productId);
         showToast('Producto devuelto a pendientes');
         document.querySelectorAll('.toast-purchase').forEach(t => t.remove());
       } catch (error) {
@@ -745,8 +776,8 @@
 
     async function borrarProducto(id, nombre) {
       const result = await Swal.fire({
-        title: '¿Eliminar producto?',
-        text: `Se eliminará "${nombre}" permanentemente`,
+        title: '¿Eliminar?',
+        text: `Se eliminará "${nombre}"`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
@@ -758,42 +789,29 @@
         showLoader(true);
         const { error } = await supabaseClient.from('products').delete().eq('id', id);
         showLoader(false);
-        
-        if (error) showToast('Error al eliminar', 'error');
-        else showToast('Producto eliminado');
+        if (error) showToast('Error', 'error');
+        else showToast('Eliminado');
       }
     }
 
     async function archivar() {
       const comprados = productos.filter(p => p.status === 'purchased');
-      
       if (comprados.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: 'No hay productos en el carrito',
-          text: 'Marca productos como comprados para archivar',
-          confirmButtonColor: '#007aff'
-        });
+        Swal.fire({ icon: 'info', title: 'No hay productos en el carrito', confirmButtonColor: '#007aff' });
         return;
       }
       
-      const total = comprados.reduce((sum, p) => sum + ((p.price || 0) * (p.quantity || 1)), 0);
+      const total = comprados.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 1)), 0);
       
       const result = await Swal.fire({
         title: '¿Archivar compra?',
-        html: `
-          <div style="text-align: left; margin-top: 12px;">
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <b>${comprados.length} productos</b> serán archivados
-            </div>
-            <div style="font-size: 14px;">
-              Total: <b style="color: #28a745;">$${formatear(total)}</b>
-            </div>
-            <div style="font-size: 12px; color: #888; margin-top: 8px;">
-              Los productos permanecerán en tu lista como pendientes
-            </div>
+        html: `<div style="text-align: left; margin-top: 12px;">
+          <div style="font-size: 14px;"><b>${comprados.length} productos</b> archivados</div>
+          <div style="font-size: 14px;">Total: <b style="color: #28a745;">$${formatear(total)}</b></div>
+          <div style="font-size: 12px; color: #888; margin-top: 8px;">
+            Los productos volverán como pendientes
           </div>
-        `,
+        </div>`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Archivar',
@@ -803,38 +821,24 @@
       
       if (result.isConfirmed) {
         showLoader(true);
-        
         try {
-          const historialItems = comprados.map(p => ({
+          const historial = comprados.map(p => ({
             product_name: p.name,
             price: p.price || 0,
             quantity: p.quantity || 1,
             total: (p.price || 0) * (p.quantity || 1)
           }));
-          
-          const { error: historyError } = await supabaseClient
-            .from('purchase_history')
-            .insert(historialItems);
-          
-          if (historyError) throw historyError;
-          
-          const idsComprados = comprados.map(p => p.id);
-          const { error: updateError } = await supabaseClient
-            .from('products')
-            .update({ status: 'pending' })
-            .in('id', idsComprados);
-          
-          if (updateError) throw updateError;
+          await supabaseClient.from('purchase_history').insert(historial);
+          const ids = comprados.map(p => p.id);
+          await supabaseClient.from('products').update({ status: 'pending' }).in('id', ids);
           showLoader(false);
-          
           Swal.fire({
             icon: 'success',
-            title: '¡Compra archivada!',
-            text: `Se archivó $${formatear(total)} en Bs. ${formatear(total * exchangeRate)}`,
+            title: '¡Archivado!',
+            text: `$${formatear(total)} (Bs. ${formatear(total * exchangeRate)})`,
             confirmButtonColor: '#28a745'
           });
         } catch (error) {
-          console.error('Error al archivar:', error);
           showLoader(false);
           showToast('Error al archivar', 'error');
         }
@@ -843,91 +847,64 @@
 
     async function mostrarHistorial() {
       showLoader(true);
-      
       try {
         const { data, error } = await supabaseClient
-          .from('purchase_history')
-          .select('*')
-          .order('archived_date', { ascending: false })
-          .limit(50);
-        
+          .from('purchase_history').select('*')
+          .order('archived_date', { ascending: false }).limit(50);
         showLoader(false);
         if (error) throw error;
         
         if (!data || data.length === 0) {
-          Swal.fire({
-            icon: 'info',
-            title: 'Sin historial',
-            text: 'Aún no has archivado ninguna compra',
-            confirmButtonColor: '#007aff'
-          });
+          Swal.fire({ icon: 'info', title: 'Sin historial', confirmButtonColor: '#007aff' });
           return;
         }
         
-        const comprasPorFecha = {};
+        const porFecha = {};
         data.forEach(item => {
           const fecha = new Date(item.archived_date).toLocaleDateString('es-ES');
-          if (!comprasPorFecha[fecha]) comprasPorFecha[fecha] = { items: [], total: 0 };
-          comprasPorFecha[fecha].items.push(item);
-          comprasPorFecha[fecha].total += item.total;
+          if (!porFecha[fecha]) porFecha[fecha] = { items: [], total: 0 };
+          porFecha[fecha].items.push(item);
+          porFecha[fecha].total += item.total;
         });
         
         let html = '<div style="text-align: left; max-height: 60vh; overflow-y: auto;">';
-        
-        Object.keys(comprasPorFecha).forEach(fecha => {
-          const compra = comprasPorFecha[fecha];
+        Object.keys(porFecha).forEach(fecha => {
+          const c = porFecha[fecha];
           html += `
             <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">📅 ${fecha}</div>
-              <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${compra.items.length} productos</div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 12px; color: #666;">${c.items.length} productos</div>
+              <div style="display: flex; justify-content: space-between;">
                 <span style="font-size: 12px; color: #888;">Total</span>
-                <span style="font-weight: 700; color: #28a745;">$${formatear(compra.total)}</span>
+                <span style="font-weight: 700; color: #28a745;">$${formatear(c.total)}</span>
               </div>
               <details style="margin-top: 8px;">
-                <summary style="font-size: 12px; color: #007aff; cursor: pointer;">Ver detalles</summary>
+                <summary style="font-size: 12px; color: #007aff;">Ver detalles</summary>
                 <div style="margin-top: 8px; font-size: 12px;">
-                  ${compra.items.map(item => `
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f0f0f0;">
-                      <span>${item.product_name} x${item.quantity}</span>
-                      <span>$${formatear(item.total)}</span>
-                    </div>
-                  `).join('')}
+                  ${c.items.map(i => `
+                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                      <span>${i.product_name} x${i.quantity}</span>
+                      <span>$${formatear(i.total)}</span>
+                    </div>`).join('')}
                 </div>
               </details>
-            </div>
-          `;
+            </div>`;
         });
-        
         html += '</div>';
         
-        Swal.fire({
-          title: '📋 Historial de Compras',
-          html: html,
-          width: 600,
-          confirmButtonText: 'Cerrar',
-          confirmButtonColor: '#007aff'
-        });
+        Swal.fire({ title: '📋 Historial', html, width: 600, confirmButtonText: 'Cerrar', confirmButtonColor: '#007aff' });
       } catch (error) {
-        console.error('Error:', error);
         showLoader(false);
-        showToast('Error al cargar historial', 'error');
+        showToast('Error al cargar', 'error');
       }
     }
 
     async function actualizarTasa(valor) {
       const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
       const { error } = await supabaseClient
-        .from('config')
-        .update({ exchange_rate: tasa })
-        .eq('id', 1);
-      
-      if (error) showToast('Error al actualizar tasa', 'error');
-      else {
-        exchangeRate = tasa;
-        renderizar();
-        showToast('Tasa actualizada');
-      }
+        .from('config').update({ exchange_rate: tasa }).eq('id', 1);
+      if (error) showToast('Error', 'error');
+      else { exchangeRate = tasa; renderizar(); showToast('Tasa actualizada'); }
     }
 
     function formatear(num) { return (num || 0).toFixed(2).replace('.', ','); }
@@ -943,8 +920,7 @@
     }
 
     function marcarOnline(status) {
-      const dot = document.getElementById('onlineStatus');
-      dot.className = `status-dot ${status ? 'online' : 'offline'}`;
+      document.getElementById('onlineStatus').className = `status-dot ${status ? 'online' : 'offline'}`;
     }
 
     function showToast(message, type = 'success') {
