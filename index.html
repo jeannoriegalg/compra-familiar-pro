@@ -124,7 +124,6 @@
 
     .product-subtotal { font-size: 12px; color: var(--text-gray); }
 
-    /* 🔧 Precio ahora es un botón clickeable, no un input */
     .price-badge {
       background: rgba(255, 59, 48, 0.08);
       color: var(--primary-red);
@@ -285,15 +284,19 @@
 
     .btn-history:active { transform: scale(0.95); }
 
-    /* 🔧 Estilos del modal de precio */
-    .price-modal-hint {
-      background: #f0f8ff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: #007aff;
-      margin-top: 8px;
-      text-align: center;
+    /* 🔧 Modal posicionado más arriba para evitar el teclado */
+    .swal2-container {
+      padding-top: 20px !important;
+    }
+
+    .swal2-popup {
+      margin-top: 10vh !important;
+    }
+
+    @media (max-height: 700px) {
+      .swal2-popup {
+        margin-top: 5vh !important;
+      }
     }
   </style>
 </head>
@@ -344,7 +347,7 @@
     let realtimeChannel = null;
     let ultimoProductoComprado = null;
     let timeoutHighlight = null;
-    let modalAbierto = false; // 🔧 Evita re-renderizar mientras hay un modal abierto
+    let modalAbierto = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarDatosIniciales();
@@ -381,7 +384,6 @@
         .channel('shopping-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, 
           (payload) => {
-            // 🔧 Si hay un modal abierto, guardar el cambio para después
             if (modalAbierto) {
               console.log('Cambio guardado para después (modal abierto)');
               return;
@@ -490,7 +492,7 @@
     }
 
     // ============================================
-    // 🔧 EDITAR PRECIO CON MODAL (TECLADO FIJO)
+    // 🔧 EDITAR PRECIO CON MODAL (TECLADO NUMÉRICO)
     // ============================================
     async function editarPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -532,29 +534,29 @@
         denyButtonColor: '#007aff',
         cancelButtonColor: '#8e8e93',
         allowOutsideClick: false,
-        allowEscapeKey: true
+        allowEscapeKey: true,
+        customClass: {
+          popup: 'modal-precio-popup'
+        }
       });
       
       modalAbierto = false;
       
-      // 🔧 Si presionó "Calculadora"
       if (isDenied) {
         await abrirCalculadoraPrecio(productId);
         return;
       }
       
-      // 🔧 Si presionó "Guardar"
       if (isConfirmed && resultado) {
         const precio = parseFloat(resultado.replace(',', '.')) || 0;
         await guardarPrecio(productId, precio);
       }
       
-      // 🔧 Sincronizar cualquier cambio pendiente
       await recargarDatos();
     }
 
     // ============================================
-    // 🧮 CALCULADORA DE PRECIOS
+    // 🧮 CALCULADORA CON TECLADO COMPLETO (+, *, /)
     // ============================================
     async function abrirCalculadoraPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -582,7 +584,7 @@
         input: 'text',
         inputPlaceholder: 'Ej: 1.2+1.5+2.3',
         inputAttributes: {
-          'inputmode': 'decimal',
+          'inputmode': 'text',
           'enterkeyhint': 'done',
           'autocomplete': 'off',
           'autocapitalize': 'off',
@@ -606,13 +608,15 @@
         confirmButtonColor: '#28a745',
         denyButtonColor: '#8e8e93',
         cancelButtonColor: '#ff3b30',
-        allowOutsideClick: false
+        allowOutsideClick: false,
+        customClass: {
+          popup: 'modal-calculadora-popup'
+        }
       });
       
       modalAbierto = false;
       
       if (isDenied) {
-        // Volver al modal de precio
         await editarPrecio(productId);
         return;
       }
@@ -621,7 +625,6 @@
         try {
           const precioFinal = evaluarExpresion(resultado);
           
-          // Mostrar confirmación del cálculo
           const confirmar = await Swal.fire({
             title: '¿Asignar este precio?',
             html: `
@@ -637,14 +640,16 @@
             showCancelButton: true,
             confirmButtonText: '✓ Sí, asignar',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#28a745'
+            confirmButtonColor: '#28a745',
+            customClass: {
+              popup: 'modal-confirmacion-popup'
+            }
           });
           
           if (confirmar.isConfirmed) {
             await guardarPrecio(productId, precioFinal);
             showToast(`Precio: $${formatear(precioFinal)}`);
           } else {
-            // Si canceló, volver a la calculadora
             await abrirCalculadoraPrecio(productId);
             return;
           }
@@ -845,6 +850,9 @@
       }
     }
 
+    // ============================================
+    // 📋 HISTORIAL CON PRODUCTOS ORDENADOS ALFABÉTICAMENTE
+    // ============================================
     async function mostrarHistorial() {
       showLoader(true);
       try {
@@ -870,6 +878,12 @@
         let html = '<div style="text-align: left; max-height: 60vh; overflow-y: auto;">';
         Object.keys(porFecha).forEach(fecha => {
           const c = porFecha[fecha];
+          
+          // 🔧 Ordenar productos alfabéticamente dentro de cada fecha
+          c.items.sort((a, b) => {
+            return a.product_name.toLowerCase().localeCompare(b.product_name.toLowerCase(), 'es', { sensitivity: 'base' });
+          });
+          
           html += `
             <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">📅 ${fecha}</div>
