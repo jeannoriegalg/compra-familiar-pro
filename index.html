@@ -5,16 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Compra Familiar Pro</title>
   
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  
-  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -30,9 +23,7 @@
       --border-color: #e0e0e0;
     }
 
-    * {
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { -webkit-tap-highlight-color: transparent; }
 
     body {
       background-color: #ffffff;
@@ -43,7 +34,6 @@
       overflow-x: hidden;
     }
 
-    /* Navbar */
     .navbar-custom {
       position: sticky;
       top: 0;
@@ -58,31 +48,21 @@
     }
 
     .status-dot {
-      height: 8px;
-      width: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-left: 6px;
+      height: 8px; width: 8px; border-radius: 50%;
+      display: inline-block; margin-left: 6px;
       animation: pulse 2s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .online { background-color: var(--primary-green); }
     .offline { background-color: var(--primary-red); }
 
     .tasa-input {
-      border: none;
-      background: var(--light-gray);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: 600;
-      width: 100px;
-      text-align: center;
+      border: none; background: var(--light-gray);
+      border-radius: 8px; padding: 6px 10px;
+      font-size: 13px; font-weight: 600;
+      width: 100px; text-align: center;
     }
 
     .tasa-input:focus {
@@ -90,24 +70,16 @@
       background: white;
     }
 
-    /* Lista de productos */
-    .product-list {
-      padding: 0;
-    }
+    .product-list { padding: 0; }
 
     .product-item {
-      display: flex;
-      padding: 14px 16px;
+      display: flex; padding: 14px 16px;
       border-bottom: 1px solid #f0f0f0;
-      align-items: center;
-      background: white;
-      transition: all 0.2s ease;
-      position: relative;
+      align-items: center; background: white;
+      transition: all 0.2s ease; position: relative;
     }
 
-    .product-item:active {
-      background: var(--light-gray);
-    }
+    .product-item:active { background: var(--light-gray); }
 
     .comprado {
       background-color: var(--soft-green-bg) !important;
@@ -119,20 +91,10 @@
       text-decoration: line-through;
     }
 
-    /* Animación para producto recién comprado */
     @keyframes highlightPurchase {
-      0% { 
-        background-color: #fff3cd; 
-        transform: scale(1);
-      }
-      50% { 
-        background-color: #ffe69c; 
-        transform: scale(1.02);
-      }
-      100% { 
-        background-color: var(--soft-green-bg); 
-        transform: scale(1);
-      }
+      0% { background-color: #fff3cd; transform: scale(1); }
+      50% { background-color: #ffe69c; transform: scale(1.02); }
+      100% { background-color: var(--soft-green-bg); transform: scale(1); }
     }
 
     .product-item.just-purchased {
@@ -140,71 +102,54 @@
       border-left: 4px solid #ffc107;
     }
 
-    /* Badge de "Recién agregado" */
     .just-added-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #ffc107;
-      color: #000;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
+      position: absolute; top: 8px; right: 8px;
+      background: #ffc107; color: #000;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px;
       animation: fadeOut 3s ease-out 2s forwards;
       z-index: 10;
     }
 
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; visibility: hidden; }
-    }
+    @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
     .product-img {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: #f0f0f2;
-      margin-right: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 20px;
-      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 10px;
+      background: #f0f0f2; margin-right: 12px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 20px; flex-shrink: 0;
     }
 
-    .product-info {
-      flex: 1;
-      min-width: 0;
-      cursor: pointer;
-    }
+    .product-info { flex: 1; min-width: 0; cursor: pointer; }
 
     .product-name {
-      font-size: 15px;
-      font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-bottom: 2px;
+      font-size: 15px; font-weight: 600;
+      overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; margin-bottom: 2px;
     }
 
-    .product-subtotal {
-      font-size: 12px;
-      color: var(--text-gray);
-    }
+    .product-subtotal { font-size: 12px; color: var(--text-gray); }
 
     .price-badge {
       background: rgba(255, 59, 48, 0.08);
       color: var(--primary-red);
-      border: none;
+      border: 2px solid transparent;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 13px;
-      width: 75px;
+      font-size: 14px;
+      width: 80px;
       text-align: center;
-      padding: 6px 4px;
+      padding: 8px 4px;
       margin: 0 8px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .price-badge:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
     }
 
     .comprado .price-badge {
@@ -213,187 +158,98 @@
     }
 
     .quantity-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 8px;
+      display: flex; align-items: center;
+      gap: 8px; margin-left: 8px;
     }
 
     .qty-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #f0f0f2;
-      border: none;
-      font-weight: bold;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #f0f0f2; border: none;
+      font-weight: bold; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
     }
 
-    .qty-btn:active {
-      background: #ddd;
-      transform: scale(0.95);
-    }
+    .qty-btn:active { background: #ddd; transform: scale(0.95); }
 
     .qty-value {
-      font-weight: 600;
-      min-width: 20px;
-      text-align: center;
-      font-size: 15px;
+      font-weight: 600; min-width: 20px;
+      text-align: center; font-size: 15px;
     }
 
-    /* Footer */
     .footer-resumen {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: white;
-      border-top: 1px solid var(--border-color);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      z-index: 1000;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+      position: fixed; bottom: 0; width: 100%;
+      background: white; border-top: 1px solid var(--border-color);
+      padding: 16px; display: flex; justify-content: space-between;
+      z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
 
-    .total-box {
-      text-align: center;
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .total-box:active {
-      opacity: 0.7;
-    }
+    .total-box { text-align: center; flex: 1; cursor: pointer; }
+    .total-box:active { opacity: 0.7; }
 
     .total-label {
-      font-size: 11px;
-      color: var(--text-gray);
-      font-weight: 700;
-      text-transform: uppercase;
+      font-size: 11px; color: var(--text-gray);
+      font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .total-val {
-      font-size: 20px;
-      font-weight: 700;
-      display: block;
-      margin-top: 4px;
-    }
+    .total-val { font-size: 20px; font-weight: 700; display: block; margin-top: 4px; }
 
     .divider {
-      width: 1px;
-      background: var(--border-color);
-      height: 40px;
-      align-self: center;
-      margin: 0 8px;
+      width: 1px; background: var(--border-color);
+      height: 40px; align-self: center; margin: 0 8px;
     }
 
-    /* FAB Button */
     .btn-fab {
-      position: fixed;
-      bottom: 100px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      background: var(--text-dark);
-      color: white;
-      border-radius: 50%;
-      border: none;
-      font-size: 28px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
+      position: fixed; bottom: 100px; right: 20px;
+      width: 56px; height: 56px; background: var(--text-dark);
+      color: white; border-radius: 50%; border: none;
+      font-size: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 1001; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s;
     }
 
-    .btn-fab:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
+    .btn-fab:active { transform: scale(0.95); }
 
-    /* Loader */
     #loader {
-      position: fixed;
-      top: 50%;
-      left: 50%;
+      position: fixed; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 2000;
-      display: none;
+      z-index: 2000; display: none;
     }
 
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border: 4px solid #f3f3f3;
       border-top: 4px solid var(--primary-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      border-radius: 50%; animation: spin 1s linear infinite;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Sección de archivados */
     .archived-section {
-      background: #f8f8f8;
-      padding: 8px 16px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-gray);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 8px;
+      background: #f8f8f8; padding: 8px 16px;
+      font-size: 11px; font-weight: 700;
+      color: var(--text-gray); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-top: 8px;
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
-      .product-item {
-        padding: 12px;
-      }
-      
-      .product-name {
-        font-size: 14px;
-      }
-      
-      .price-badge {
-        width: 65px;
-        font-size: 12px;
-      }
-      
-      .qty-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 16px;
-      }
+      .product-item { padding: 12px; }
+      .product-name { font-size: 14px; }
+      .price-badge { width: 70px; font-size: 13px; }
+      .qty-btn { width: 28px; height: 28px; font-size: 16px; }
     }
 
-    /* Toast notification */
     .toast-container {
-      position: fixed;
-      top: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3000;
+      position: fixed; top: 70px; left: 50%;
+      transform: translateX(-50%); z-index: 3000;
     }
 
     .custom-toast {
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 13px;
-      margin-bottom: 8px;
+      background: rgba(0,0,0,0.8); color: white;
+      padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; margin-bottom: 8px;
       animation: fadeInOut 3s ease;
     }
 
@@ -404,85 +260,42 @@
       100% { opacity: 0; transform: translateY(-10px); }
     }
 
-    /* Toast para compra */
     .toast-purchase {
-      background: rgba(40, 167, 69, 0.95);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: rgba(40, 167, 69, 0.95); color: white;
+      padding: 12px 20px; border-radius: 8px; font-size: 14px;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
       animation: slideIn 0.3s ease-out;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .toast-purchase .undo-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
-    .toast-purchase .undo-btn:hover {
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.2); border: none;
+      color: white; padding: 4px 12px; border-radius: 4px;
+      cursor: pointer; font-size: 12px; font-weight: 600; margin-left: 8px;
     }
 
     @keyframes slideIn {
-      from { 
-        transform: translateY(-20px); 
-        opacity: 0; 
-      }
-      to { 
-        transform: translateY(0); 
-        opacity: 1; 
-      }
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Botón Historial */
     .btn-history {
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      width: 48px;
-      height: 48px;
-      background: var(--primary-blue);
-      color: white;
-      border-radius: 50%;
-      border: none;
-      font-size: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
+      position: fixed; bottom: 100px; left: 20px;
+      width: 48px; height: 48px; background: var(--primary-blue);
+      color: white; border-radius: 50%; border: none;
+      font-size: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 1001; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s;
     }
 
-    .btn-history:active {
-      transform: scale(0.95);
-    }
+    .btn-history:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
 
-  <!-- Loader -->
-  <div id="loader">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- Toast Container -->
+  <div id="loader"><div class="spinner"></div></div>
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Navbar -->
   <div class="navbar-custom">
     <div>
       <input type="text" id="tasaCambio" class="tasa-input" placeholder="Tasa" onchange="actualizarTasa(this.value)">
@@ -496,16 +309,11 @@
     </div>
   </div>
 
-  <!-- Lista de Productos -->
   <div id="listaProductos" class="product-list"></div>
 
-  <!-- FAB Button -->
   <button class="btn-fab" onclick="nuevoProducto()">+</button>
-
-  <!-- Botón Historial -->
   <button class="btn-history" onclick="mostrarHistorial()" title="Ver historial">📋</button>
 
-  <!-- Footer -->
   <div class="footer-resumen">
     <div class="total-box">
       <span class="total-label">Faltante</span>
@@ -520,10 +328,7 @@
   </div>
 
   <script>
-    // ============================================
-    // CONFIGURACIÓN DE SUPABASE
-    // ============================================
-   const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
+    const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -533,10 +338,11 @@
     let realtimeChannel = null;
     let ultimoProductoComprado = null;
     let timeoutHighlight = null;
+    
+    // 🔧 Variables para controlar edición de precios
+    let precioEnEdicion = null;
+    let valorEnEdicion = null;
 
-    // ============================================
-    // INICIALIZACIÓN
-    // ============================================
     document.addEventListener('DOMContentLoaded', () => {
       cargarDatosIniciales();
       suscribirseACambios();
@@ -546,7 +352,6 @@
       showLoader(true);
       
       try {
-        // Cargar configuración
         const { data: configData, error: configError } = await supabaseClient
           .from('config')
           .select('exchange_rate')
@@ -556,7 +361,6 @@
         exchangeRate = configData?.exchange_rate || 36.50;
         document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
         
-        // Cargar productos
         const { data: productsData, error: productsError } = await supabaseClient
           .from('products')
           .select('*')
@@ -576,29 +380,22 @@
       }
     }
 
-    // ============================================
-    // REALTIME SUBSCRIPTION
-    // ============================================
     function suscribirseACambios() {
       realtimeChannel = supabaseClient
         .channel('shopping-changes')
         .on('postgres_changes', 
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'products' 
-          }, 
+          { event: '*', schema: 'public', table: 'products' }, 
           (payload) => {
-            console.log('Cambio detectado:', payload);
+            // 🔧 Si estamos editando un precio, ignorar cambios del realtime
+            if (precioEnEdicion) {
+              console.log('Cambio ignorado durante edición');
+              return;
+            }
             sincronizarCambios(payload);
           }
         )
         .on('postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'config'
-          },
+          { event: 'UPDATE', schema: 'public', table: 'config' },
           (payload) => {
             exchangeRate = payload.new.exchange_rate;
             document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
@@ -606,13 +403,10 @@
           }
         )
         .subscribe((status) => {
-          console.log('Realtime status:', status);
           if (status === 'SUBSCRIBED') {
             marcarOnline(true);
-            showToast('Conectado en tiempo real');
           } else if (status === 'CHANNEL_ERROR') {
             marcarOnline(false);
-            showToast('Error de conexión', 'error');
           }
         });
     }
@@ -624,9 +418,7 @@
         productos.push(nuevo);
       } else if (eventType === 'UPDATE') {
         const index = productos.findIndex(p => p.id === nuevo.id);
-        if (index !== -1) {
-          productos[index] = nuevo;
-        }
+        if (index !== -1) productos[index] = nuevo;
       } else if (eventType === 'DELETE') {
         productos = productos.filter(p => p.id !== viejo.id);
       }
@@ -634,11 +426,7 @@
       renderizar();
     }
 
-    // ============================================
-    // RENDERIZADO CON ORDENAMIENTO ALFABÉTICO
-    // ============================================
     function renderizar() {
-      // Ordenar alfabéticamente por nombre
       const productosOrdenados = [...productos].sort((a, b) => {
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
@@ -652,26 +440,22 @@
       let totalPendiente = 0;
       let totalComprado = 0;
       
-      // Renderizar pendientes
       pendientes.forEach(p => {
         const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
         totalPendiente += subtotal;
         html += crearItemHTML(p, subtotal, false);
       });
       
-      // Renderizar comprados
       if (comprados.length > 0) {
         html += '<div class="archived-section">En Carrito</div>';
         comprados.forEach(p => {
           const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
           totalComprado += subtotal;
-          // Marcar el último comprado
           const esUltimo = (p.id === ultimoProductoComprado);
           html += crearItemHTML(p, subtotal, esUltimo);
         });
       }
       
-      // Mostrar mensaje si no hay productos
       if (productos.length === 0) {
         html = `
           <div style="text-align: center; padding: 40px 20px; color: var(--text-gray);">
@@ -688,18 +472,12 @@
       document.getElementById('totalBs').innerText = `Bs. ${formatear(totalComprado * exchangeRate)}`;
       document.getElementById('contadorItems').innerText = pendientes.length;
       
-      // Limpiar el highlight después de 3 segundos
-      if (timeoutHighlight) {
-        clearTimeout(timeoutHighlight);
-      }
+      if (timeoutHighlight) clearTimeout(timeoutHighlight);
       
       timeoutHighlight = setTimeout(() => {
         ultimoProductoComprado = null;
-        // Re-renderizar sin highlight si es necesario
         const hayComprados = productos.some(p => p.status === 'purchased');
-        if (hayComprados) {
-          renderizar();
-        }
+        if (hayComprados) renderizar();
       }, 3000);
     }
 
@@ -718,8 +496,19 @@
               $${formatear(producto.price || 0)} × ${producto.quantity} = <b>$${formatear(subtotal)}</b>
             </div>
           </div>
-          <input type="text" class="price-badge" value="${formatear(producto.price || 0)}" 
-                 onchange="actualizarPrecio('${producto.id}', this.value)" onclick="event.stopPropagation()">
+          <input 
+            type="text" 
+            id="price-${producto.id}"
+            class="price-badge" 
+            value="${formatear(producto.price || 0)}" 
+            inputmode="decimal"
+            pattern="[0-9.,]*"
+            autocomplete="off"
+            onfocus="iniciarEdicionPrecio('${producto.id}')"
+            onblur="finalizarEdicionPrecio('${producto.id}', this.value)"
+            ondblclick="abrirCalculadoraPrecio(event, '${producto.id}')"
+            onclick="event.stopPropagation()"
+          >
           <div class="quantity-controls">
             <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity - 1})">−</button>
             <span class="qty-value">${producto.quantity}</span>
@@ -729,9 +518,115 @@
       `;
     }
 
-    // ============================================
-    // OPERACIONES CON PRODUCTOS
-    // ============================================
+    // 🔧 Funciones para controlar edición de precio
+    function iniciarEdicionPrecio(id) {
+      precioEnEdicion = id;
+      const input = document.getElementById(`price-${id}`);
+      if (input) valorEnEdicion = input.value;
+    }
+
+    function finalizarEdicionPrecio(id, valor) {
+      precioEnEdicion = null;
+      actualizarPrecio(id, valor);
+    }
+
+    // 🧮 Calculadora de precios con doble tap
+    async function abrirCalculadoraPrecio(event, productId) {
+      event.stopPropagation();
+      event.preventDefault();
+      
+      const producto = productos.find(p => p.id === productId);
+      if (!producto) return;
+      
+      const { value: expresion } = await Swal.fire({
+        title: '💰 Calculadora de Precio',
+        html: `
+          <div style="text-align: left; margin-bottom: 12px;">
+            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+              Producto: <b>${escapeHtml(producto.name)}</b>
+            </div>
+            <div style="font-size: 12px; color: #888;">
+              Precio actual: <b>$${formatear(producto.price || 0)}</b>
+            </div>
+          </div>
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Ejemplos:</div>
+            <div style="font-size: 12px; color: #333;">
+              • 1.2+1.5+2.3 = 5.00<br>
+              • 10*2 = 20.00<br>
+              • 50-10 = 40.00<br>
+              • 100/4 = 25.00
+            </div>
+          </div>
+        `,
+        input: 'text',
+        inputPlaceholder: 'Ej: 1.2+1.5+2.3',
+        inputAttributes: {
+          'inputmode': 'decimal',
+          'autocomplete': 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Calcular y Asignar',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+          if (!value) return 'Ingresa una expresión matemática';
+          
+          // Validar que solo contenga números, operadores y decimales
+          if (!/^[\d+\-*/().,\s]+$/.test(value)) {
+            return 'Solo se permiten números y operadores (+, -, *, /)';
+          }
+          
+          try {
+            const resultado = evaluarExpresion(value);
+            if (isNaN(resultado) || !isFinite(resultado)) {
+              return 'Expresión inválida';
+            }
+          } catch (e) {
+            return 'Error en la expresión';
+          }
+        },
+        preConfirm: (value) => {
+          const resultado = evaluarExpresion(value);
+          return { expresion: value, resultado: resultado };
+        }
+      });
+      
+      if (expresion) {
+        const resultadoFinal = expresion.resultado;
+        
+        // Actualizar en Supabase
+        const { error } = await supabaseClient
+          .from('products')
+          .update({ price: resultadoFinal })
+          .eq('id', productId);
+        
+        if (error) {
+          showToast('Error al actualizar', 'error');
+        } else {
+          showToast(`Precio actualizado: $${formatear(resultadoFinal)}`);
+        }
+      }
+    }
+
+    // Función para evaluar expresiones matemáticas de forma segura
+    function evaluarExpresion(expresion) {
+      // Reemplazar comas por puntos
+      let expr = expresion.replace(/,/g, '.');
+      
+      // Validar caracteres permitidos
+      if (!/^[\d+\-*/().\s]+$/.test(expr)) {
+        throw new Error('Caracteres no permitidos');
+      }
+      
+      // Usar Function constructor para evaluar (más seguro que eval directo)
+      try {
+        const resultado = new Function('return ' + expr)();
+        return Math.round(resultado * 100) / 100; // Redondear a 2 decimales
+      } catch (e) {
+        throw new Error('Expresión inválida');
+      }
+    }
+
     async function nuevoProducto() {
       const { value: nombre } = await Swal.fire({
         title: 'Nuevo Producto',
@@ -761,7 +656,6 @@
             .single();
           
           if (error) throw error;
-          
           showToast('Producto agregado');
         } catch (error) {
           console.error('Error:', error);
@@ -780,9 +674,7 @@
         .update({ price: precio })
         .eq('id', id);
       
-      if (error) {
-        showToast('Error al actualizar', 'error');
-      }
+      if (error) showToast('Error al actualizar', 'error');
     }
 
     async function ajustarCantidad(id, nuevaCantidad) {
@@ -793,14 +685,9 @@
         .update({ quantity: nuevaCantidad })
         .eq('id', id);
       
-      if (error) {
-        showToast('Error al actualizar', 'error');
-      }
+      if (error) showToast('Error al actualizar', 'error');
     }
 
-    // ============================================
-    // CAMBIAR ESTADO CON HIGHLIGHT Y UNDO
-    // ============================================
     async function cambiarEstado(id, estadoActual) {
       const producto = productos.find(p => p.id === id);
       if (!producto) return;
@@ -818,49 +705,29 @@
           return;
         }
         
-        // Si se marcó como comprado, mostrar highlight y notificación
         if (nuevoEstado === 'purchased') {
           ultimoProductoComprado = id;
-          
-          // Limpiar timeout anterior si existe
-          if (timeoutHighlight) {
-            clearTimeout(timeoutHighlight);
-          }
-          
-          // Mostrar notificación con undo
+          if (timeoutHighlight) clearTimeout(timeoutHighlight);
           mostrarNotificacionConUndo(producto.name, id);
         }
-        
       } catch (error) {
         console.error('Error:', error);
         showToast('Error al actualizar', 'error');
       }
     }
 
-    // Mostrar notificación con botón deshacer
     function mostrarNotificacionConUndo(nombreProducto, productId) {
       const container = document.getElementById('toastContainer');
-      
       const toast = document.createElement('div');
       toast.className = 'toast-purchase';
       toast.innerHTML = `
         <span>✓ <b>${escapeHtml(nombreProducto)}</b> agregado al carrito</span>
-        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">
-          ↶ Deshacer
-        </button>
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶ Deshacer</button>
       `;
-      
       container.appendChild(toast);
-      
-      // Auto-eliminar después de 5 segundos
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.remove();
-        }
-      }, 5000);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
     }
 
-    // Función para deshacer
     async function deshacerUltimaCompra(productId) {
       try {
         const { error } = await supabaseClient
@@ -869,13 +736,8 @@
           .eq('id', productId);
         
         if (error) throw error;
-        
         showToast('Producto devuelto a pendientes');
-        
-        // Limpiar notificaciones
-        const toasts = document.querySelectorAll('.toast-purchase');
-        toasts.forEach(t => t.remove());
-        
+        document.querySelectorAll('.toast-purchase').forEach(t => t.remove());
       } catch (error) {
         showToast('Error al deshacer', 'error');
       }
@@ -894,25 +756,14 @@
       
       if (result.isConfirmed) {
         showLoader(true);
-        
-        const { error } = await supabaseClient
-          .from('products')
-          .delete()
-          .eq('id', id);
-        
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
         showLoader(false);
         
-        if (error) {
-          showToast('Error al eliminar', 'error');
-        } else {
-          showToast('Producto eliminado');
-        }
+        if (error) showToast('Error al eliminar', 'error');
+        else showToast('Producto eliminado');
       }
     }
 
-    // ============================================
-    // ARCHIVAR COMPRA (Sin eliminar productos)
-    // ============================================
     async function archivar() {
       const comprados = productos.filter(p => p.status === 'purchased');
       
@@ -939,7 +790,7 @@
               Total: <b style="color: #28a745;">$${formatear(total)}</b>
             </div>
             <div style="font-size: 12px; color: #888; margin-top: 8px;">
-              Los productos permanecerán en tu lista como pendientes para futuras compras
+              Los productos permanecerán en tu lista como pendientes
             </div>
           </div>
         `,
@@ -954,7 +805,6 @@
         showLoader(true);
         
         try {
-          // 1. Guardar en historial
           const historialItems = comprados.map(p => ({
             product_name: p.name,
             price: p.price || 0,
@@ -968,7 +818,6 @@
           
           if (historyError) throw historyError;
           
-          // 2. Cambiar estado de vuelta a pending (mantener en la lista)
           const idsComprados = comprados.map(p => p.id);
           const { error: updateError } = await supabaseClient
             .from('products')
@@ -976,7 +825,6 @@
             .in('id', idsComprados);
           
           if (updateError) throw updateError;
-          
           showLoader(false);
           
           Swal.fire({
@@ -985,7 +833,6 @@
             text: `Se archivó $${formatear(total)} en Bs. ${formatear(total * exchangeRate)}`,
             confirmButtonColor: '#28a745'
           });
-          
         } catch (error) {
           console.error('Error al archivar:', error);
           showLoader(false);
@@ -994,9 +841,6 @@
       }
     }
 
-    // ============================================
-    // MOSTRAR HISTORIAL
-    // ============================================
     async function mostrarHistorial() {
       showLoader(true);
       
@@ -1008,7 +852,6 @@
           .limit(50);
         
         showLoader(false);
-        
         if (error) throw error;
         
         if (!data || data.length === 0) {
@@ -1021,13 +864,10 @@
           return;
         }
         
-        // Agrupar por fecha
         const comprasPorFecha = {};
         data.forEach(item => {
           const fecha = new Date(item.archived_date).toLocaleDateString('es-ES');
-          if (!comprasPorFecha[fecha]) {
-            comprasPorFecha[fecha] = { items: [], total: 0 };
-          }
+          if (!comprasPorFecha[fecha]) comprasPorFecha[fecha] = { items: [], total: 0 };
           comprasPorFecha[fecha].items.push(item);
           comprasPorFecha[fecha].total += item.total;
         });
@@ -1038,12 +878,8 @@
           const compra = comprasPorFecha[fecha];
           html += `
             <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">
-                📅 ${fecha}
-              </div>
-              <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                ${compra.items.length} productos
-              </div>
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">📅 ${fecha}</div>
+              <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${compra.items.length} productos</div>
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 12px; color: #888;">Total</span>
                 <span style="font-weight: 700; color: #28a745;">$${formatear(compra.total)}</span>
@@ -1072,7 +908,6 @@
           confirmButtonText: 'Cerrar',
           confirmButtonColor: '#007aff'
         });
-        
       } catch (error) {
         console.error('Error:', error);
         showLoader(false);
@@ -1080,32 +915,22 @@
       }
     }
 
-    // ============================================
-    // CONFIGURACIÓN
-    // ============================================
     async function actualizarTasa(valor) {
       const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
-      
       const { error } = await supabaseClient
         .from('config')
         .update({ exchange_rate: tasa })
         .eq('id', 1);
       
-      if (error) {
-        showToast('Error al actualizar tasa', 'error');
-      } else {
+      if (error) showToast('Error al actualizar tasa', 'error');
+      else {
         exchangeRate = tasa;
         renderizar();
         showToast('Tasa actualizada');
       }
     }
 
-    // ============================================
-    // UTILIDADES
-    // ============================================
-    function formatear(num) {
-      return (num || 0).toFixed(2).replace('.', ',');
-    }
+    function formatear(num) { return (num || 0).toFixed(2).replace('.', ','); }
 
     function escapeHtml(text) {
       const div = document.createElement('div');
@@ -1128,19 +953,12 @@
       toast.className = 'custom-toast';
       toast.style.background = type === 'error' ? 'rgba(255,59,48,0.9)' : 'rgba(0,0,0,0.8)';
       toast.textContent = message;
-      
       container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
     }
 
-    // Limpiar suscripción al cerrar
     window.addEventListener('beforeunload', () => {
-      if (realtimeChannel) {
-        supabaseClient.removeChannel(realtimeChannel);
-      }
+      if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
     });
   </script>
 </body>
