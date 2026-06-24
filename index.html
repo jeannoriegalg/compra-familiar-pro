@@ -284,65 +284,111 @@
 
     .btn-history:active { transform: scale(0.95); }
 
-    /* 🔧 ESTILOS PARA MODAL EN LA PARTE SUPERIOR */
+    /* 🔧 MODAL EN LA PARTE SUPERIOR CON BOTONES ABAJO */
     .swal2-top {
       align-items: flex-start !important;
     }
 
     .modal-top .swal2-popup {
       margin-top: 60px !important;
-      padding: 16px !important;
-      max-width: 360px !important;
+      padding: 0 !important;
+      max-width: 380px !important;
       width: 92vw !important;
-      border-radius: 16px !important;
+      border-radius: 20px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+
+    .modal-top .swal2-header {
+      padding: 20px 20px 10px !important;
+      margin: 0 !important;
     }
 
     .modal-top .swal2-title {
-      font-size: 18px !important;
-      margin-bottom: 8px !important;
+      font-size: 20px !important;
+      margin: 0 !important;
       padding: 0 !important;
     }
 
     .modal-top .swal2-html-container {
-      margin: 8px 0 !important;
+      margin: 0 !important;
+      padding: 0 20px 10px !important;
       font-size: 13px !important;
+      flex: 1 !important;
     }
 
     .modal-top .swal2-input {
-      font-size: 20px !important;
-      padding: 12px !important;
-      margin: 10px 0 !important;
+      font-size: 22px !important;
+      padding: 14px !important;
+      margin: 10px 20px !important;
       height: auto !important;
-      border-radius: 10px !important;
+      border-radius: 12px !important;
       text-align: center !important;
       font-weight: 600 !important;
+      width: calc(100% - 40px) !important;
+      box-sizing: border-box !important;
     }
 
+    /* 🔧 BOTONES EN LA PARTE INFERIOR */
     .modal-top .swal2-actions {
-      margin-top: 14px !important;
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-      justify-content: center !important;
+      margin: 0 !important;
+      padding: 16px !important;
+      background: #f8f9fa !important;
+      border-top: 1px solid #e0e0e0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
     }
 
     .modal-top .swal2-confirm,
     .modal-top .swal2-deny,
     .modal-top .swal2-cancel {
-      font-size: 14px !important;
-      padding: 10px 16px !important;
+      font-size: 16px !important;
+      padding: 14px 20px !important;
       margin: 0 !important;
-      border-radius: 10px !important;
+      border-radius: 12px !important;
       font-weight: 600 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .modal-top .swal2-cancel {
+      background: #f0f0f2 !important;
+      color: #666 !important;
+      order: 3 !important;
+    }
+
+    .modal-top .swal2-deny {
+      order: 2 !important;
+    }
+
+    .modal-top .swal2-confirm {
+      order: 1 !important;
     }
 
     .modal-top .swal2-validation-message {
-      font-size: 12px !important;
+      font-size: 13px !important;
+      padding: 0 20px !important;
+      margin: 5px 0 !important;
     }
 
     /* Modal de historial más ancho */
     .modal-historial .swal2-popup {
       width: 95vw !important;
       max-width: 500px !important;
+    }
+
+    .modal-historial .swal2-actions {
+      flex-direction: row !important;
+      justify-content: center !important;
+    }
+
+    .modal-historial .swal2-confirm {
+      width: auto !important;
+      min-width: 120px !important;
     }
   </style>
 </head>
@@ -516,7 +562,7 @@
       return `
         <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative;">
           ${badgeExtra}
-          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">️</div>
+          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
           <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
             <div class="product-name">${escapeHtml(producto.name)}</div>
             <div class="product-subtotal">
@@ -535,7 +581,7 @@
     }
 
     // ============================================
-    // 🔧 EDITAR PRECIO - MODAL EN LA PARTE SUPERIOR
+    // 🔧 EDITAR PRECIO - BOTONES ABAJO
     // ============================================
     async function editarPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -566,9 +612,9 @@
         },
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '✓ Guardar',
-        denyButtonText: '🧮 Calc',
-        cancelButtonText: '',
+        confirmButtonText: '✓ Guardar Precio',
+        denyButtonText: '🧮 Usar Calculadora',
+        cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#007aff',
         cancelButtonColor: '#8e8e93',
@@ -606,7 +652,7 @@
     }
 
     // ============================================
-    // 🧮 CALCULADORA - MODAL EN LA PARTE SUPERIOR
+    // 🧮 CALCULADORA - BOTONES ABAJO
     // ============================================
     async function abrirCalculadoraPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -643,9 +689,9 @@
         },
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '✓ Asignar',
-        denyButtonText: '← Atrás',
-        cancelButtonText: '',
+        confirmButtonText: '✓ Asignar Resultado',
+        denyButtonText: '← Volver a Precio',
+        cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#8e8e93',
         cancelButtonColor: '#ff3b30',
@@ -675,7 +721,7 @@
           const precioFinal = evaluarExpresion(resultado);
           
           const confirmar = await Swal.fire({
-            title: '¿Asignar?',
+            title: '¿Asignar este precio?',
             html: `
               <div style="font-family:monospace;background:#f5f5f7;padding:8px;border-radius:6px;margin:8px 0;">
                 ${resultado} = <b>$${formatear(precioFinal)}</b>
@@ -684,8 +730,8 @@
             `,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '✓ Sí',
-            cancelButtonText: '✕',
+            confirmButtonText: '✓ Sí, Asignar',
+            cancelButtonText: 'Cancelar',
             confirmButtonColor: '#28a745',
             position: 'top',
             customClass: {
@@ -806,7 +852,7 @@
       toast.className = 'toast-purchase';
       toast.innerHTML = `
         <span>✓ <b>${escapeHtml(nombre)}</b></span>
-        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')"></button>`;
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶</button>`;
       container.appendChild(toast);
       setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
     }
@@ -899,7 +945,7 @@
     }
 
     // ============================================
-    // 📋 HISTORIAL ORDENADO ALFABÉTICAMENTE
+    //  HISTORIAL ORDENADO ALFABÉTICAMENTE
     // ============================================
     async function mostrarHistorial() {
       showLoader(true);
