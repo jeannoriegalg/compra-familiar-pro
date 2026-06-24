@@ -284,19 +284,65 @@
 
     .btn-history:active { transform: scale(0.95); }
 
-    /* 🔧 Modal posicionado más arriba para evitar el teclado */
-    .swal2-container {
-      padding-top: 20px !important;
+    /* 🔧 ESTILOS PARA MODAL EN LA PARTE SUPERIOR */
+    .swal2-top {
+      align-items: flex-start !important;
     }
 
-    .swal2-popup {
-      margin-top: 10vh !important;
+    .modal-top .swal2-popup {
+      margin-top: 60px !important;
+      padding: 16px !important;
+      max-width: 360px !important;
+      width: 92vw !important;
+      border-radius: 16px !important;
     }
 
-    @media (max-height: 700px) {
-      .swal2-popup {
-        margin-top: 5vh !important;
-      }
+    .modal-top .swal2-title {
+      font-size: 18px !important;
+      margin-bottom: 8px !important;
+      padding: 0 !important;
+    }
+
+    .modal-top .swal2-html-container {
+      margin: 8px 0 !important;
+      font-size: 13px !important;
+    }
+
+    .modal-top .swal2-input {
+      font-size: 20px !important;
+      padding: 12px !important;
+      margin: 10px 0 !important;
+      height: auto !important;
+      border-radius: 10px !important;
+      text-align: center !important;
+      font-weight: 600 !important;
+    }
+
+    .modal-top .swal2-actions {
+      margin-top: 14px !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      justify-content: center !important;
+    }
+
+    .modal-top .swal2-confirm,
+    .modal-top .swal2-deny,
+    .modal-top .swal2-cancel {
+      font-size: 14px !important;
+      padding: 10px 16px !important;
+      margin: 0 !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+    }
+
+    .modal-top .swal2-validation-message {
+      font-size: 12px !important;
+    }
+
+    /* Modal de historial más ancho */
+    .modal-historial .swal2-popup {
+      width: 95vw !important;
+      max-width: 500px !important;
     }
   </style>
 </head>
@@ -384,10 +430,7 @@
         .channel('shopping-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, 
           (payload) => {
-            if (modalAbierto) {
-              console.log('Cambio guardado para después (modal abierto)');
-              return;
-            }
+            if (modalAbierto) return;
             sincronizarCambios(payload);
           }
         )
@@ -473,7 +516,7 @@
       return `
         <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative;">
           ${badgeExtra}
-          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
+          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">️</div>
           <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
             <div class="product-name">${escapeHtml(producto.name)}</div>
             <div class="product-subtotal">
@@ -492,7 +535,7 @@
     }
 
     // ============================================
-    // 🔧 EDITAR PRECIO CON MODAL (TECLADO NUMÉRICO)
+    // 🔧 EDITAR PRECIO - MODAL EN LA PARTE SUPERIOR
     // ============================================
     async function editarPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -501,14 +544,10 @@
       modalAbierto = true;
       
       const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
-        title: '💲 Editar Precio',
+        title: '💲 Precio',
         html: `
-          <div style="margin-bottom: 12px;">
-            <div style="font-size: 14px; font-weight: 600; color: #1d1d1f;">${escapeHtml(producto.name)}</div>
-            <div style="font-size: 12px; color: #888; margin-top: 4px;">
-              Precio actual: <b>$${formatear(producto.price || 0)}</b>
-            </div>
-          </div>
+          <div style="font-size:13px;color:#666;margin-bottom:4px;">${escapeHtml(producto.name)}</div>
+          <div style="font-size:11px;color:#999;">Actual: $${formatear(producto.price || 0)}</div>
         `,
         input: 'text',
         inputValue: formatear(producto.price || 0),
@@ -523,20 +562,31 @@
           if (!value || value.trim() === '') return 'Ingresa un precio';
           const num = parseFloat(value.replace(',', '.'));
           if (isNaN(num)) return 'Precio inválido';
-          if (num < 0) return 'El precio no puede ser negativo';
+          if (num < 0) return 'No puede ser negativo';
         },
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: '✓ Guardar',
-        denyButtonText: '🧮 Calculadora',
-        cancelButtonText: 'Cancelar',
+        denyButtonText: '🧮 Calc',
+        cancelButtonText: '',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#007aff',
         cancelButtonColor: '#8e8e93',
         allowOutsideClick: false,
         allowEscapeKey: true,
+        position: 'top',
         customClass: {
-          popup: 'modal-precio-popup'
+          container: 'modal-top',
+          popup: 'modal-top-popup'
+        },
+        didOpen: () => {
+          setTimeout(() => {
+            const input = document.querySelector('.swal2-input');
+            if (input) {
+              input.focus();
+              input.select();
+            }
+          }, 100);
         }
       });
       
@@ -556,7 +606,7 @@
     }
 
     // ============================================
-    // 🧮 CALCULADORA CON TECLADO COMPLETO (+, *, /)
+    // 🧮 CALCULADORA - MODAL EN LA PARTE SUPERIOR
     // ============================================
     async function abrirCalculadoraPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
@@ -567,22 +617,13 @@
       const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
         title: '🧮 Calculadora',
         html: `
-          <div style="text-align: left; margin-bottom: 12px;">
-            <div style="font-size: 14px; font-weight: 600; color: #1d1d1f; margin-bottom: 4px;">
-              ${escapeHtml(producto.name)}
-            </div>
-            <div style="background: #f0f8ff; padding: 10px; border-radius: 8px; font-size: 12px; color: #007aff;">
-              <b>Ejemplos válidos:</b><br>
-              • <code>1.2+1.5+2.3</code> → <b>5.00</b><br>
-              • <code>10*2</code> → <b>20.00</b><br>
-              • <code>50-10</code> → <b>40.00</b><br>
-              • <code>100/4</code> → <b>25.00</b><br>
-              • <code>(10+5)*2</code> → <b>30.00</b>
-            </div>
+          <div style="font-size:12px;color:#666;margin-bottom:6px;">${escapeHtml(producto.name)}</div>
+          <div style="background:#f0f8ff;padding:8px;border-radius:6px;font-size:11px;color:#007aff;">
+            Ej: <code>1.2+1.5</code> · <code>10*2</code> · <code>50-10</code>
           </div>
         `,
         input: 'text',
-        inputPlaceholder: 'Ej: 1.2+1.5+2.3',
+        inputPlaceholder: '1.2+1.5+2.3',
         inputAttributes: {
           'inputmode': 'text',
           'enterkeyhint': 'done',
@@ -594,23 +635,31 @@
           if (!value || value.trim() === '') return 'Ingresa una expresión';
           try {
             const r = evaluarExpresion(value);
-            if (isNaN(r) || !isFinite(r)) return 'Expresión inválida';
-            if (r < 0) return 'El resultado no puede ser negativo';
+            if (isNaN(r) || !isFinite(r)) return 'Inválida';
+            if (r < 0) return 'No negativo';
           } catch (e) {
-            return 'Error en la expresión';
+            return 'Error';
           }
         },
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '✓ Asignar Resultado',
-        denyButtonText: '← Volver',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: '✓ Asignar',
+        denyButtonText: '← Atrás',
+        cancelButtonText: '',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#8e8e93',
         cancelButtonColor: '#ff3b30',
         allowOutsideClick: false,
+        position: 'top',
         customClass: {
-          popup: 'modal-calculadora-popup'
+          container: 'modal-top',
+          popup: 'modal-top-popup'
+        },
+        didOpen: () => {
+          setTimeout(() => {
+            const input = document.querySelector('.swal2-input');
+            if (input) input.focus();
+          }, 100);
         }
       });
       
@@ -626,35 +675,34 @@
           const precioFinal = evaluarExpresion(resultado);
           
           const confirmar = await Swal.fire({
-            title: '¿Asignar este precio?',
+            title: '¿Asignar?',
             html: `
-              <div style="font-size: 14px;">
-                <div style="color: #888; margin-bottom: 4px;">Expresión:</div>
-                <div style="font-family: monospace; background: #f5f5f7; padding: 8px; border-radius: 6px; margin-bottom: 12px;">
-                  ${resultado} = <b>$${formatear(precioFinal)}</b>
-                </div>
-                <div style="color: #888;">Producto: <b>${escapeHtml(producto.name)}</b></div>
+              <div style="font-family:monospace;background:#f5f5f7;padding:8px;border-radius:6px;margin:8px 0;">
+                ${resultado} = <b>$${formatear(precioFinal)}</b>
               </div>
+              <div style="font-size:12px;color:#888;">${escapeHtml(producto.name)}</div>
             `,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '✓ Sí, asignar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: '✓ Sí',
+            cancelButtonText: '✕',
             confirmButtonColor: '#28a745',
+            position: 'top',
             customClass: {
-              popup: 'modal-confirmacion-popup'
+              container: 'modal-top',
+              popup: 'modal-top-popup'
             }
           });
           
           if (confirmar.isConfirmed) {
             await guardarPrecio(productId, precioFinal);
-            showToast(`Precio: $${formatear(precioFinal)}`);
+            showToast(`$${formatear(precioFinal)}`);
           } else {
             await abrirCalculadoraPrecio(productId);
             return;
           }
         } catch (e) {
-          showToast('Error en la expresión', 'error');
+          showToast('Error', 'error');
           await abrirCalculadoraPrecio(productId);
           return;
         }
@@ -669,11 +717,8 @@
         .update({ price: precio })
         .eq('id', productId);
       
-      if (error) {
-        showToast('Error al actualizar', 'error');
-      } else {
-        showToast(`Precio actualizado: $${formatear(precio)}`);
-      }
+      if (error) showToast('Error', 'error');
+      else showToast(`$${formatear(precio)}`);
     }
 
     function evaluarExpresion(expresion) {
@@ -694,13 +739,10 @@
           renderizar();
         }
       } catch (e) {
-        console.error('Error recargando:', e);
+        console.error('Error:', e);
       }
     }
 
-    // ============================================
-    // OTRAS OPERACIONES
-    // ============================================
     async function nuevoProducto() {
       const { value: nombre } = await Swal.fire({
         title: 'Nuevo Producto',
@@ -709,7 +751,9 @@
         showCancelButton: true,
         confirmButtonText: 'Agregar',
         cancelButtonText: 'Cancelar',
-        inputValidator: (value) => { if (!value) return 'Escribe un nombre'; }
+        inputValidator: (value) => { if (!value) return 'Escribe un nombre'; },
+        position: 'top',
+        customClass: { container: 'modal-top' }
       });
       
       if (nombre) {
@@ -719,10 +763,10 @@
             .from('products')
             .insert([{ name: nombre.trim(), price: 0, quantity: 1, status: 'pending' }]);
           if (error) throw error;
-          showToast('Producto agregado');
+          showToast('Agregado');
           await recargarDatos();
         } catch (error) {
-          showToast('Error al agregar', 'error');
+          showToast('Error', 'error');
         } finally {
           showLoader(false);
         }
@@ -732,10 +776,8 @@
     async function ajustarCantidad(id, nuevaCantidad) {
       if (nuevaCantidad < 1) return;
       const { error } = await supabaseClient
-        .from('products')
-        .update({ quantity: nuevaCantidad })
-        .eq('id', id);
-      if (error) showToast('Error al actualizar', 'error');
+        .from('products').update({ quantity: nuevaCantidad }).eq('id', id);
+      if (error) showToast('Error', 'error');
     }
 
     async function cambiarEstado(id, estadoActual) {
@@ -763,8 +805,8 @@
       const toast = document.createElement('div');
       toast.className = 'toast-purchase';
       toast.innerHTML = `
-        <span>✓ <b>${escapeHtml(nombre)}</b> agregado al carrito</span>
-        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶ Deshacer</button>`;
+        <span>✓ <b>${escapeHtml(nombre)}</b></span>
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')"></button>`;
       container.appendChild(toast);
       setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
     }
@@ -772,22 +814,24 @@
     async function deshacerUltimaCompra(productId) {
       try {
         await supabaseClient.from('products').update({ status: 'pending' }).eq('id', productId);
-        showToast('Producto devuelto a pendientes');
+        showToast('Devuelto');
         document.querySelectorAll('.toast-purchase').forEach(t => t.remove());
       } catch (error) {
-        showToast('Error al deshacer', 'error');
+        showToast('Error', 'error');
       }
     }
 
     async function borrarProducto(id, nombre) {
       const result = await Swal.fire({
         title: '¿Eliminar?',
-        text: `Se eliminará "${nombre}"`,
+        text: `"${nombre}"`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#ff3b30'
+        confirmButtonColor: '#ff3b30',
+        position: 'top',
+        customClass: { container: 'modal-top' }
       });
       
       if (result.isConfirmed) {
@@ -802,26 +846,28 @@
     async function archivar() {
       const comprados = productos.filter(p => p.status === 'purchased');
       if (comprados.length === 0) {
-        Swal.fire({ icon: 'info', title: 'No hay productos en el carrito', confirmButtonColor: '#007aff' });
+        Swal.fire({ 
+          icon: 'info', 
+          title: 'Carrito vacío', 
+          confirmButtonColor: '#007aff',
+          position: 'top',
+          customClass: { container: 'modal-top' }
+        });
         return;
       }
       
       const total = comprados.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 1)), 0);
       
       const result = await Swal.fire({
-        title: '¿Archivar compra?',
-        html: `<div style="text-align: left; margin-top: 12px;">
-          <div style="font-size: 14px;"><b>${comprados.length} productos</b> archivados</div>
-          <div style="font-size: 14px;">Total: <b style="color: #28a745;">$${formatear(total)}</b></div>
-          <div style="font-size: 12px; color: #888; margin-top: 8px;">
-            Los productos volverán como pendientes
-          </div>
-        </div>`,
+        title: '¿Archivar?',
+        html: `<div style="font-size:14px;"><b>${comprados.length}</b> productos · <b style="color:#28a745;">$${formatear(total)}</b></div>`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Archivar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#28a745'
+        confirmButtonColor: '#28a745',
+        position: 'top',
+        customClass: { container: 'modal-top' }
       });
       
       if (result.isConfirmed) {
@@ -840,18 +886,20 @@
           Swal.fire({
             icon: 'success',
             title: '¡Archivado!',
-            text: `$${formatear(total)} (Bs. ${formatear(total * exchangeRate)})`,
-            confirmButtonColor: '#28a745'
+            text: `$${formatear(total)}`,
+            confirmButtonColor: '#28a745',
+            position: 'top',
+            customClass: { container: 'modal-top' }
           });
         } catch (error) {
           showLoader(false);
-          showToast('Error al archivar', 'error');
+          showToast('Error', 'error');
         }
       }
     }
 
     // ============================================
-    // 📋 HISTORIAL CON PRODUCTOS ORDENADOS ALFABÉTICAMENTE
+    // 📋 HISTORIAL ORDENADO ALFABÉTICAMENTE
     // ============================================
     async function mostrarHistorial() {
       showLoader(true);
@@ -863,7 +911,13 @@
         if (error) throw error;
         
         if (!data || data.length === 0) {
-          Swal.fire({ icon: 'info', title: 'Sin historial', confirmButtonColor: '#007aff' });
+          Swal.fire({ 
+            icon: 'info', 
+            title: 'Sin historial', 
+            confirmButtonColor: '#007aff',
+            position: 'top',
+            customClass: { container: 'modal-top' }
+          });
           return;
         }
         
@@ -881,7 +935,11 @@
           
           // 🔧 Ordenar productos alfabéticamente dentro de cada fecha
           c.items.sort((a, b) => {
-            return a.product_name.toLowerCase().localeCompare(b.product_name.toLowerCase(), 'es', { sensitivity: 'base' });
+            return a.product_name.toLowerCase().localeCompare(
+              b.product_name.toLowerCase(), 
+              'es', 
+              { sensitivity: 'base' }
+            );
           });
           
           html += `
@@ -906,10 +964,20 @@
         });
         html += '</div>';
         
-        Swal.fire({ title: '📋 Historial', html, width: 600, confirmButtonText: 'Cerrar', confirmButtonColor: '#007aff' });
+        Swal.fire({ 
+          title: '📋 Historial', 
+          html, 
+          width: 600, 
+          confirmButtonText: 'Cerrar', 
+          confirmButtonColor: '#007aff',
+          position: 'top',
+          customClass: { 
+            container: 'modal-top modal-historial'
+          }
+        });
       } catch (error) {
         showLoader(false);
-        showToast('Error al cargar', 'error');
+        showToast('Error', 'error');
       }
     }
 
