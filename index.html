@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Compra Familiar Pro</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -26,36 +29,50 @@
       --cat-lacteos: #4a90e2;
       --cat-carnes: #e74c3c;
       --cat-verduras: #27ae60;
+      --cat-frutas: #e91e63;
       --cat-panaderia: #f39c12;
       --cat-bebidas: #9b59b6;
-      --cat-limpieza: #1abc9c;
       --cat-despensa: #e67e22;
+      --cat-limpieza: #1abc9c;
+      --cat-farmacia: #9c27b0;
+      --cat-vehiculo: #607d8b;
       --cat-otros: #95a5a6;
     }
 
-    * { -webkit-tap-highlight-color: transparent; }
+    * { 
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+    }
 
     body {
       background-color: #ffffff;
       font-family: 'Inter', sans-serif;
       color: var(--text-dark);
-      padding-bottom: 150px;
+      padding-bottom: 110px;
       margin: 0;
-      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Header con búsqueda integrada */
+    /* Header compacto */
     .navbar-custom {
       position: sticky;
       top: 0;
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      padding: 12px 16px;
+      padding: 8px 12px;
       background: white;
       border-bottom: 1px solid var(--border-color);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      gap: 10px;
+      gap: 8px;
     }
 
     .navbar-top {
@@ -81,11 +98,11 @@
     .tasa-input {
       border: none;
       background: var(--light-gray);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 13px;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
       font-weight: 600;
-      width: 100px;
+      width: 85px;
       text-align: center;
     }
 
@@ -94,14 +111,14 @@
       background: white;
     }
 
-    /* 🔍 Barra de búsqueda */
+    /* Barra de búsqueda compacta */
     .search-bar {
       width: 100%;
-      padding: 10px 16px;
+      padding: 8px 12px;
       border: none;
       background: var(--light-gray);
-      border-radius: 12px;
-      font-size: 15px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 500;
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
@@ -113,19 +130,15 @@
       box-shadow: 0 0 0 2px var(--primary-blue);
     }
 
-    .search-bar::placeholder {
-      color: var(--text-gray);
-    }
-
-    /* 🎯 Tira de categorías */
+    /* Tira de categorías compacta */
     .category-filter {
       position: sticky;
-      top: 110px;
+      top: 75px;
       z-index: 999;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      padding: 10px 16px;
+      padding: 8px 12px;
       background: white;
       border-bottom: 1px solid var(--border-color);
       scrollbar-width: none;
@@ -134,9 +147,9 @@
     .category-filter::-webkit-scrollbar { display: none; }
 
     .category-chip {
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
@@ -147,35 +160,35 @@
       flex-shrink: 0;
     }
 
-    .category-chip:active {
-      transform: scale(0.95);
-    }
+    .category-chip:active { transform: scale(0.95); }
 
     .category-chip.active {
       transform: scale(1.05);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border-width: 2px;
       border-style: solid;
+      color: white !important;
     }
 
-    .category-chip[data-cat="todos"].active { background: var(--text-dark); color: white; border-color: var(--text-dark); }
-    .category-chip[data-cat="lacteos"].active { background: #e3f2fd; color: var(--cat-lacteos); border-color: var(--cat-lacteos); }
-    .category-chip[data-cat="carnes"].active { background: #ffebee; color: var(--cat-carnes); border-color: var(--cat-carnes); }
-    .category-chip[data-cat="verduras"].active { background: #e8f5e9; color: var(--cat-verduras); border-color: var(--cat-verduras); }
-    .category-chip[data-cat="panaderia"].active { background: #fff3e0; color: var(--cat-panaderia); border-color: var(--cat-panaderia); }
-    .category-chip[data-cat="bebidas"].active { background: #f3e5f5; color: var(--cat-bebidas); border-color: var(--cat-bebidas); }
-    .category-chip[data-cat="limpieza"].active { background: #e0f2f1; color: var(--cat-limpieza); border-color: var(--cat-limpieza); }
-    .category-chip[data-cat="despensa"].active { background: #fff8e1; color: var(--cat-despensa); border-color: var(--cat-despensa); }
-    .category-chip[data-cat="otros"].active { background: #f5f5f5; color: var(--cat-otros); border-color: var(--cat-otros); }
+    .category-chip[data-cat="todos"].active { background: var(--text-dark); border-color: var(--text-dark); }
+    .category-chip[data-cat="lacteos"].active { background: var(--cat-lacteos); border-color: var(--cat-lacteos); }
+    .category-chip[data-cat="carnes"].active { background: var(--cat-carnes); border-color: var(--cat-carnes); }
+    .category-chip[data-cat="verduras"].active { background: var(--cat-verduras); border-color: var(--cat-verduras); }
+    .category-chip[data-cat="frutas"].active { background: var(--cat-frutas); border-color: var(--cat-frutas); }
+    .category-chip[data-cat="panaderia"].active { background: var(--cat-panaderia); border-color: var(--cat-panaderia); }
+    .category-chip[data-cat="bebidas"].active { background: var(--cat-bebidas); border-color: var(--cat-bebidas); }
+    .category-chip[data-cat="despensa"].active { background: var(--cat-despensa); border-color: var(--cat-despensa); }
+    .category-chip[data-cat="limpieza"].active { background: var(--cat-limpieza); border-color: var(--cat-limpieza); }
+    .category-chip[data-cat="farmacia"].active { background: var(--cat-farmacia); border-color: var(--cat-farmacia); }
+    .category-chip[data-cat="vehiculo"].active { background: var(--cat-vehiculo); border-color: var(--cat-vehiculo); }
+    .category-chip[data-cat="otros"].active { background: var(--cat-otros); border-color: var(--cat-otros); }
 
     /* Secciones por categoría */
-    .category-section {
-      margin-bottom: 8px;
-    }
+    .category-section { margin-bottom: 6px; }
 
     .category-header {
-      padding: 10px 16px;
-      font-size: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -184,7 +197,7 @@
       justify-content: space-between;
       align-items: center;
       position: sticky;
-      top: 165px;
+      top: 125px;
       z-index: 50;
     }
 
@@ -192,10 +205,9 @@
       background: rgba(255, 255, 255, 0.3);
       padding: 2px 8px;
       border-radius: 10px;
-      font-size: 11px;
+      font-size: 10px;
     }
 
-    /* Indicador de color lateral en cada producto */
     .category-indicator {
       width: 4px;
       height: 100%;
@@ -207,9 +219,10 @@
 
     .product-list { padding: 0; }
 
+    /* Productos más compactos */
     .product-item {
       display: flex;
-      padding: 14px 16px;
+      padding: 10px 12px;
       border-bottom: 1px solid #f0f0f0;
       align-items: center;
       background: white;
@@ -242,13 +255,13 @@
 
     .just-added-badge {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 6px;
+      right: 6px;
       background: #ffc107;
       color: #000;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 4px;
       animation: fadeOut 3s ease-out 2s forwards;
       z-index: 10;
@@ -257,16 +270,16 @@
     @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
     .product-img {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
       background: #f0f0f2;
-      margin-right: 12px;
+      margin-right: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 20px;
+      font-size: 18px;
       flex-shrink: 0;
     }
 
@@ -277,7 +290,7 @@
     }
 
     .product-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -286,7 +299,7 @@
     }
 
     .product-subtotal {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-gray);
     }
 
@@ -294,13 +307,13 @@
       background: rgba(255, 59, 48, 0.08);
       color: var(--primary-red);
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 700;
-      font-size: 14px;
-      min-width: 75px;
+      font-size: 13px;
+      min-width: 65px;
       text-align: center;
-      padding: 8px 8px;
-      margin: 0 8px;
+      padding: 6px 6px;
+      margin: 0 6px;
       cursor: pointer;
       transition: all 0.2s;
       user-select: none;
@@ -320,18 +333,18 @@
     .quantity-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-left: 8px;
+      gap: 6px;
+      margin-left: 6px;
     }
 
     .qty-btn {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: #f0f0f2;
       border: none;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -343,23 +356,24 @@
 
     .qty-value {
       font-weight: 600;
-      min-width: 20px;
+      min-width: 18px;
       text-align: center;
-      font-size: 15px;
+      font-size: 14px;
     }
 
+    /* Footer más compacto */
     .footer-resumen {
       position: fixed;
       bottom: 0;
       width: 100%;
       background: white;
       border-top: 1px solid var(--border-color);
-      padding: 16px;
+      padding: 10px 12px;
       display: flex;
       justify-content: space-between;
       z-index: 1000;
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
     }
 
     .total-box {
@@ -371,7 +385,7 @@
     .total-box:active { opacity: 0.7; }
 
     .total-label {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-gray);
       font-weight: 700;
       text-transform: uppercase;
@@ -379,31 +393,31 @@
     }
 
     .total-val {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       display: block;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .divider {
       width: 1px;
       background: var(--border-color);
-      height: 40px;
+      height: 35px;
       align-self: center;
-      margin: 0 8px;
+      margin: 0 6px;
     }
 
     .btn-fab {
       position: fixed;
-      bottom: 100px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
+      bottom: 90px;
+      right: 16px;
+      width: 50px;
+      height: 50px;
       background: var(--text-dark);
       color: white;
       border-radius: 50%;
       border: none;
-      font-size: 28px;
+      font-size: 24px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
       z-index: 1001;
       display: flex;
@@ -437,20 +451,21 @@
 
     .archived-section {
       background: #f8f8f8;
-      padding: 8px 16px;
-      font-size: 11px;
+      padding: 6px 12px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--text-gray);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-top: 8px;
+      margin-top: 6px;
     }
 
     @media (max-width: 480px) {
-      .product-item { padding: 12px; }
-      .product-name { font-size: 14px; }
-      .price-badge { min-width: 70px; font-size: 13px; padding: 6px 6px; }
-      .qty-btn { width: 28px; height: 28px; font-size: 16px; }
+      .product-item { padding: 9px 10px; }
+      .product-name { font-size: 13px; }
+      .price-badge { min-width: 60px; font-size: 12px; padding: 5px 5px; }
+      .qty-btn { width: 26px; height: 26px; font-size: 15px; }
+      .product-img { width: 36px; height: 36px; margin-right: 8px; }
     }
 
     .toast-container {
@@ -464,10 +479,10 @@
     .custom-toast {
       background: rgba(0, 0, 0, 0.8);
       color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 13px;
-      margin-bottom: 8px;
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 12px;
+      margin-bottom: 6px;
       animation: fadeInOut 3s ease;
     }
 
@@ -481,13 +496,13 @@
     .toast-purchase {
       background: rgba(40, 167, 69, 0.95);
       color: white;
-      padding: 12px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
-      font-size: 14px;
-      margin-bottom: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       animation: slideIn 0.3s ease-out;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
@@ -496,12 +511,12 @@
       background: rgba(255, 255, 255, 0.2);
       border: none;
       color: white;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      margin-left: 8px;
+      margin-left: 6px;
     }
 
     @keyframes slideIn {
@@ -511,15 +526,15 @@
 
     .btn-history {
       position: fixed;
-      bottom: 100px;
-      left: 20px;
-      width: 48px;
-      height: 48px;
+      bottom: 90px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
       background: var(--primary-blue);
       color: white;
       border-radius: 50%;
       border: none;
-      font-size: 20px;
+      font-size: 18px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
       z-index: 1001;
       display: flex;
@@ -531,7 +546,7 @@
 
     .btn-history:active { transform: scale(0.95); }
 
-    /* Estilos del modal en la parte superior */
+    /* Modal en parte superior */
     .swal2-top { align-items: flex-start !important; }
 
     .modal-top .swal2-popup {
@@ -546,55 +561,55 @@
     }
 
     .modal-top .swal2-header {
-      padding: 20px 20px 10px !important;
+      padding: 16px 16px 8px !important;
       margin: 0 !important;
     }
 
     .modal-top .swal2-title {
-      font-size: 20px !important;
+      font-size: 18px !important;
       margin: 0 !important;
       padding: 0 !important;
     }
 
     .modal-top .swal2-html-container {
       margin: 0 !important;
-      padding: 0 20px 10px !important;
-      font-size: 13px !important;
+      padding: 0 16px 8px !important;
+      font-size: 12px !important;
       flex: 1 !important;
     }
 
     .modal-top .swal2-input,
     .modal-top .swal2-select {
-      font-size: 18px !important;
-      padding: 14px !important;
-      margin: 8px 20px !important;
+      font-size: 16px !important;
+      padding: 12px !important;
+      margin: 6px 16px !important;
       height: auto !important;
-      border-radius: 12px !important;
+      border-radius: 10px !important;
       text-align: center !important;
       font-weight: 600 !important;
-      width: calc(100% - 40px) !important;
+      width: calc(100% - 32px) !important;
       box-sizing: border-box !important;
     }
 
     .modal-top .swal2-actions {
       margin: 0 !important;
-      padding: 16px !important;
+      padding: 12px !important;
       background: #f8f9fa !important;
       border-top: 1px solid #e0e0e0 !important;
       width: 100% !important;
       box-sizing: border-box !important;
       display: flex !important;
       flex-direction: column !important;
-      gap: 10px !important;
+      gap: 8px !important;
     }
 
     .modal-top .swal2-confirm,
     .modal-top .swal2-deny,
     .modal-top .swal2-cancel {
-      font-size: 16px !important;
-      padding: 14px 20px !important;
+      font-size: 15px !important;
+      padding: 12px 16px !important;
       margin: 0 !important;
-      border-radius: 12px !important;
+      border-radius: 10px !important;
       font-weight: 600 !important;
       width: 100% !important;
       box-sizing: border-box !important;
@@ -610,9 +625,9 @@
     .modal-top .swal2-confirm { order: 1 !important; }
 
     .modal-top .swal2-validation-message {
-      font-size: 13px !important;
-      padding: 0 20px !important;
-      margin: 5px 0 !important;
+      font-size: 11px !important;
+      padding: 0 16px !important;
+      margin: 4px 0 !important;
     }
 
     .modal-historial .swal2-popup {
@@ -627,7 +642,7 @@
 
     .modal-historial .swal2-confirm {
       width: auto !important;
-      min-width: 120px !important;
+      min-width: 100px !important;
     }
   </style>
 </head>
@@ -637,24 +652,24 @@
   <div id="loader"><div class="spinner"></div></div>
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Header con búsqueda integrada -->
+  <!-- Header compacto -->
   <div class="navbar-custom">
     <div class="navbar-top">
       <div>
         <input type="text" id="tasaCambio" class="tasa-input" placeholder="Tasa" onchange="actualizarTasa(this.value)">
       </div>
-      <div style="font-weight: 700; font-size: 16px;">
+      <div style="font-weight: 700; font-size: 15px;">
         Compra Fam Pro
         <span id="onlineStatus" class="status-dot online"></span>
       </div>
       <div>
-        <span id="contadorItems" class="badge rounded-pill bg-danger" style="font-size: 12px;">0</span>
+        <span id="contadorItems" class="badge rounded-pill bg-danger" style="font-size: 11px;">0</span>
       </div>
     </div>
     <input type="text" class="search-bar" placeholder="🔍 Buscar producto..." id="searchInput" oninput="filtrarProductos()">
   </div>
 
-  <!-- Tira de categorías -->
+  <!-- Tira de categorías con Farmacia y Vehículo -->
   <div class="category-filter" id="categoryFilter">
     <div class="category-chip active" data-cat="todos" onclick="filtrarCategoria('todos')">📋 Todos</div>
     <div class="category-chip" data-cat="lacteos" onclick="filtrarCategoria('lacteos')">🥛 Lácteos</div>
@@ -665,6 +680,8 @@
     <div class="category-chip" data-cat="bebidas" onclick="filtrarCategoria('bebidas')">🥤 Bebidas</div>
     <div class="category-chip" data-cat="despensa" onclick="filtrarCategoria('despensa')">🥫 Despensa</div>
     <div class="category-chip" data-cat="limpieza" onclick="filtrarCategoria('limpieza')">🧹 Limpieza</div>
+    <div class="category-chip" data-cat="farmacia" onclick="filtrarCategoria('farmacia')">🏥 Farmacia</div>
+    <div class="category-chip" data-cat="vehiculo" onclick="filtrarCategoria('vehiculo')">🚗 Vehículo</div>
     <div class="category-chip" data-cat="otros" onclick="filtrarCategoria('otros')">📦 Otros</div>
   </div>
 
@@ -674,6 +691,7 @@
   <button class="btn-fab" onclick="nuevoProducto()">+</button>
   <button class="btn-history" onclick="mostrarHistorial()" title="Ver historial">📋</button>
 
+  <!-- Footer compacto -->
   <div class="footer-resumen">
     <div class="total-box">
       <span class="total-label">Faltante</span>
@@ -681,9 +699,9 @@
     </div>
     <div class="divider"></div>
     <div class="total-box" onclick="archivar()">
-      <span class="total-label">Archivar Compra</span>
+      <span class="total-label">Archivar</span>
       <span id="totalComprado" class="total-val" style="color: var(--primary-green);">$0,00</span>
-      <small id="totalBs" class="text-muted fw-bold" style="font-size: 10px; display: block; margin-top: 2px;">Bs. 0,00</small>
+      <small id="totalBs" class="text-muted fw-bold" style="font-size: 9px; display: block; margin-top: 1px;">Bs. 0,00</small>
     </div>
   </div>
 
@@ -699,8 +717,6 @@
     let ultimoProductoComprado = null;
     let timeoutHighlight = null;
     let modalAbierto = false;
-
-    // 🔧 NUEVAS VARIABLES
     let categoriaActual = 'todos';
     let busquedaActual = '';
 
@@ -768,7 +784,6 @@
       renderizar();
     }
 
-    // 🔧 NUEVAS FUNCIONES DE FILTRADO
     function filtrarProductos() {
       busquedaActual = document.getElementById('searchInput').value.toLowerCase().trim();
       renderizar();
@@ -783,7 +798,6 @@
       renderizar();
     }
 
-    // 🔧 HELPERS DE CATEGORÍAS
     function getCategoryName(cat) {
       const names = {
         lacteos: '🥛 Lácteos',
@@ -794,6 +808,8 @@
         bebidas: '🥤 Bebidas',
         despensa: '🥫 Despensa',
         limpieza: '🧹 Limpieza',
+        farmacia: '🏥 Farmacia',
+        vehiculo: '🚗 Vehículo',
         otros: '📦 Otros'
       };
       return names[cat] || '📦 Otros';
@@ -804,41 +820,37 @@
         lacteos: 'var(--cat-lacteos)',
         carnes: 'var(--cat-carnes)',
         verduras: 'var(--cat-verduras)',
-        frutas: '#e91e63',
+        frutas: 'var(--cat-frutas)',
         panaderia: 'var(--cat-panaderia)',
         bebidas: 'var(--cat-bebidas)',
         despensa: 'var(--cat-despensa)',
         limpieza: 'var(--cat-limpieza)',
+        farmacia: 'var(--cat-farmacia)',
+        vehiculo: 'var(--cat-vehiculo)',
         otros: 'var(--cat-otros)'
       };
       return colors[cat] || 'var(--cat-otros)';
     }
 
-    // 🔧 RENDERIZADO CON BÚSQUEDA Y AGRUPACIÓN POR CATEGORÍA
     function renderizar() {
-      // 1. Aplicar filtros
       let productosFiltrados = [...productos];
 
-      // Filtro por búsqueda
       if (busquedaActual) {
         productosFiltrados = productosFiltrados.filter(p =>
           p.name.toLowerCase().includes(busquedaActual)
         );
       }
 
-      // Filtro por categoría
       if (categoriaActual !== 'todos') {
         productosFiltrados = productosFiltrados.filter(p =>
           (p.category || 'otros') === categoriaActual
         );
       }
 
-      // 2. Ordenar alfabéticamente
       const productosOrdenados = [...productosFiltrados].sort((a, b) => {
         return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'es', { sensitivity: 'base' });
       });
 
-      // 3. Separar pendientes y comprados
       const pendientes = productosOrdenados.filter(p => p.status === 'pending');
       const comprados = productosOrdenados.filter(p => p.status === 'purchased');
 
@@ -846,7 +858,6 @@
       let totalPendiente = 0;
       let totalComprado = 0;
 
-      // 4. Calcular totales
       pendientes.forEach(p => {
         const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
         totalPendiente += subtotal;
@@ -857,7 +868,6 @@
         totalComprado += subtotal;
       });
 
-      // 5. Agrupar por categoría
       const categoriasPendientes = {};
       pendientes.forEach(p => {
         const cat = p.category || 'otros';
@@ -865,10 +875,8 @@
         categoriasPendientes[cat].push(p);
       });
 
-      // 6. Orden de categorías predefinido (orden lógico de supermercado)
-      const ordenCategorias = ['lacteos', 'carnes', 'verduras', 'frutas', 'panaderia', 'bebidas', 'despensa', 'limpieza', 'otros'];
+      const ordenCategorias = ['lacteos', 'carnes', 'verduras', 'frutas', 'panaderia', 'bebidas', 'despensa', 'limpieza', 'farmacia', 'vehiculo', 'otros'];
 
-      // 7. Renderizar pendientes agrupados por categoría
       ordenCategorias.forEach(cat => {
         if (categoriasPendientes[cat] && categoriasPendientes[cat].length > 0) {
           const catColor = getCategoryColor(cat);
@@ -889,7 +897,6 @@
         }
       });
 
-      // 8. Renderizar sección "En Carrito" (comprados)
       if (comprados.length > 0) {
         html += '<div class="archived-section">En Carrito</div>';
         comprados.forEach(p => {
@@ -898,7 +905,6 @@
         });
       }
 
-      // 9. Mensaje si no hay productos
       if (productosFiltrados.length === 0) {
         if (productos.length === 0) {
           html = `
@@ -958,9 +964,6 @@
         </div>`;
     }
 
-    // ============================================
-    // 🔧 EDITAR PRECIO - BOTONES ABAJO (sin cambios)
-    // ============================================
     async function editarPrecio(productId) {
       const producto = productos.find(p => p.id === productId);
       if (!producto) return;
@@ -970,7 +973,7 @@
       const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
         title: '💲 Precio',
         html: `
-          <div style="font-size:13px;color:#666;margin-bottom:4px;">${escapeHtml(producto.name)}</div>
+          <div style="font-size:12px;color:#666;margin-bottom:4px;">${escapeHtml(producto.name)}</div>
           <div style="font-size:11px;color:#999;">Actual: $${formatear(producto.price || 0)}</div>
         `,
         input: 'text',
@@ -990,8 +993,8 @@
         },
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '✓ Guardar Precio',
-        denyButtonText: '🧮 Usar Calculadora',
+        confirmButtonText: '✓ Guardar',
+        denyButtonText: '🧮 Calculadora',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#007aff',
@@ -1029,8 +1032,8 @@
       const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
         title: '🧮 Calculadora',
         html: `
-          <div style="font-size:12px;color:#666;margin-bottom:6px;">${escapeHtml(producto.name)}</div>
-          <div style="background:#f0f8ff;padding:8px;border-radius:6px;font-size:11px;color:#007aff;">
+          <div style="font-size:11px;color:#666;margin-bottom:6px;">${escapeHtml(producto.name)}</div>
+          <div style="background:#f0f8ff;padding:6px;border-radius:6px;font-size:10px;color:#007aff;">
             Ej: <code>1.2+1.5</code> · <code>10*2</code> · <code>50-10</code>
           </div>
         `,
@@ -1053,8 +1056,8 @@
         },
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '✓ Asignar Resultado',
-        denyButtonText: '← Volver a Precio',
+        confirmButtonText: '✓ Asignar',
+        denyButtonText: '← Atrás',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#28a745',
         denyButtonColor: '#8e8e93',
@@ -1079,16 +1082,16 @@
           const precioFinal = evaluarExpresion(resultado);
 
           const confirmar = await Swal.fire({
-            title: '¿Asignar este precio?',
+            title: '¿Asignar?',
             html: `
-              <div style="font-family:monospace;background:#f5f5f7;padding:8px;border-radius:6px;margin:8px 0;">
+              <div style="font-family:monospace;background:#f5f5f7;padding:6px;border-radius:6px;margin:6px 0;">
                 ${resultado} = <b>$${formatear(precioFinal)}</b>
               </div>
-              <div style="font-size:12px;color:#888;">${escapeHtml(producto.name)}</div>
+              <div style="font-size:11px;color:#888;">${escapeHtml(producto.name)}</div>
             `,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '✓ Sí, Asignar',
+            confirmButtonText: '✓ Sí',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#28a745',
             position: 'top',
@@ -1134,7 +1137,6 @@
       } catch (e) { console.error('Error:', e); }
     }
 
-    // 🔧 NUEVO PRODUCTO CON SELECTOR DE CATEGORÍA
     async function nuevoProducto() {
       modalAbierto = true;
 
@@ -1152,6 +1154,8 @@
             <option value="bebidas">🥤 Bebidas</option>
             <option value="despensa">🥫 Despensa</option>
             <option value="limpieza">🧹 Limpieza</option>
+            <option value="farmacia">🏥 Farmacia</option>
+            <option value="vehiculo">🚗 Vehículo</option>
           </select>
         `,
         focusConfirm: false,
@@ -1290,7 +1294,7 @@
 
       const result = await Swal.fire({
         title: '¿Archivar?',
-        html: `<div style="font-size:14px;"><b>${comprados.length}</b> productos · <b style="color:#28a745;">$${formatear(total)}</b></div>`,
+        html: `<div style="font-size:13px;"><b>${comprados.length}</b> productos · <b style="color:#28a745;">$${formatear(total)}</b></div>`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Archivar',
@@ -1364,18 +1368,18 @@
           });
 
           html += `
-            <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px;">📅 ${fecha}</div>
-              <div style="font-size: 12px; color: #666;">${c.items.length} productos</div>
+            <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #eee;">
+              <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px;">📅 ${fecha}</div>
+              <div style="font-size: 11px; color: #666;">${c.items.length} productos</div>
               <div style="display: flex; justify-content: space-between;">
-                <span style="font-size: 12px; color: #888;">Total</span>
+                <span style="font-size: 11px; color: #888;">Total</span>
                 <span style="font-weight: 700; color: #28a745;">$${formatear(c.total)}</span>
               </div>
-              <details style="margin-top: 8px;">
-                <summary style="font-size: 12px; color: #007aff;">Ver detalles</summary>
-                <div style="margin-top: 8px; font-size: 12px;">
+              <details style="margin-top: 6px;">
+                <summary style="font-size: 11px; color: #007aff;">Ver detalles</summary>
+                <div style="margin-top: 6px; font-size: 11px;">
                   ${c.items.map(i => `
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
                       <span>${i.product_name} x${i.quantity}</span>
                       <span>$${formatear(i.total)}</span>
                     </div>`).join('')}
