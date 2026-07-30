@@ -52,7 +52,7 @@
     }
 
     body {
-      background-color: #ffffff;
+      background-color: #fafafa;
       font-family: 'Inter', sans-serif;
       color: var(--text-dark);
       padding-bottom: 110px;
@@ -68,11 +68,11 @@
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      padding: 8px 12px;
+      padding: 10px 14px;
       background: white;
       border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      gap: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      gap: 9px;
     }
 
     .navbar-top {
@@ -114,7 +114,7 @@
     /* Barra de búsqueda compacta */
     .search-bar {
       width: 100%;
-      padding: 8px 12px;
+      padding: 9px 12px;
       border: none;
       background: var(--light-gray);
       border-radius: 10px;
@@ -130,15 +130,15 @@
       box-shadow: 0 0 0 2px var(--primary-blue);
     }
 
-    /* Tira de categorías compacta */
+    /* Tira de categorías compacta (para filtrar, ya no agrupan) */
     .category-filter {
       position: sticky;
-      top: 75px;
+      top: 77px;
       z-index: 999;
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding: 8px 12px;
+      padding: 8px 14px;
       background: white;
       border-bottom: 1px solid var(--border-color);
       scrollbar-width: none;
@@ -183,46 +183,14 @@
     .category-chip[data-cat="vehiculo"].active { background: var(--cat-vehiculo); border-color: var(--cat-vehiculo); }
     .category-chip[data-cat="otros"].active { background: var(--cat-otros); border-color: var(--cat-otros); }
 
-    /* Secciones por categoría */
-    .category-section { margin-bottom: 6px; }
+    .category-section { margin-bottom: 4px; }
 
-    .category-header {
-      padding: 8px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 125px;
-      z-index: 50;
-    }
+    .product-list { padding: 4px 0 0; }
 
-    .category-count {
-      background: rgba(255, 255, 255, 0.3);
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 10px;
-    }
-
-    .category-indicator {
-      width: 4px;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      border-radius: 0 2px 2px 0;
-    }
-
-    .product-list { padding: 0; }
-
-    /* Productos más compactos */
+    /* Productos: lista única, alfabética, con marca de categoría discreta */
     .product-item {
       display: flex;
-      padding: 10px 12px;
+      padding: 11px 14px 11px 12px;
       border-bottom: 1px solid #f0f0f0;
       align-items: center;
       background: white;
@@ -289,13 +257,26 @@
       cursor: pointer;
     }
 
+    .product-name-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 2px;
+    }
+
+    .cat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
     .product-name {
       font-size: 14px;
       font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-bottom: 2px;
     }
 
     .product-subtotal {
@@ -451,17 +432,19 @@
 
     .archived-section {
       background: #f8f8f8;
-      padding: 6px 12px;
+      padding: 8px 14px;
       font-size: 10px;
       font-weight: 700;
       color: var(--text-gray);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-top: 6px;
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
     }
 
     @media (max-width: 480px) {
-      .product-item { padding: 9px 10px; }
+      .product-item { padding: 10px 12px 10px 10px; }
       .product-name { font-size: 13px; }
       .price-badge { min-width: 60px; font-size: 12px; padding: 5px 5px; }
       .qty-btn { width: 26px; height: 26px; font-size: 15px; }
@@ -669,7 +652,7 @@
     <input type="text" class="search-bar" placeholder="🔍 Buscar producto..." id="searchInput" oninput="filtrarProductos()">
   </div>
 
-  <!-- Tira de categorías con Farmacia y Vehículo -->
+  <!-- Tira de categorías: solo filtra, ya no agrupa -->
   <div class="category-filter" id="categoryFilter">
     <div class="category-chip active" data-cat="todos" onclick="filtrarCategoria('todos')">📋 Todos</div>
     <div class="category-chip" data-cat="lacteos" onclick="filtrarCategoria('lacteos')">🥛 Lácteos</div>
@@ -868,34 +851,16 @@
         totalComprado += subtotal;
       });
 
-      const categoriasPendientes = {};
-      pendientes.forEach(p => {
-        const cat = p.category || 'otros';
-        if (!categoriasPendientes[cat]) categoriasPendientes[cat] = [];
-        categoriasPendientes[cat].push(p);
-      });
-
-      const ordenCategorias = ['lacteos', 'carnes', 'verduras', 'frutas', 'panaderia', 'bebidas', 'despensa', 'limpieza', 'farmacia', 'vehiculo', 'otros'];
-
-      ordenCategorias.forEach(cat => {
-        if (categoriasPendientes[cat] && categoriasPendientes[cat].length > 0) {
-          const catColor = getCategoryColor(cat);
-          const catName = getCategoryName(cat);
-
-          html += `<div class="category-section">
-            <div class="category-header" style="background: ${catColor};">
-              <span>${catName}</span>
-              <span class="category-count">${categoriasPendientes[cat].length}</span>
-            </div>`;
-
-          categoriasPendientes[cat].forEach(p => {
-            const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
-            html += crearItemHTML(p, subtotal, false, catColor);
-          });
-
-          html += '</div>';
-        }
-      });
+      // Lista única, ordenada alfabéticamente (sin agrupar por categoría)
+      if (pendientes.length > 0) {
+        html += '<div class="category-section">';
+        pendientes.forEach(p => {
+          const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+          const catColor = getCategoryColor(p.category || 'otros');
+          html += crearItemHTML(p, subtotal, false, catColor);
+        });
+        html += '</div>';
+      }
 
       if (comprados.length > 0) {
         html += '<div class="archived-section">En Carrito</div>';
@@ -943,12 +908,14 @@
       const subtotalReal = parseFloat(producto.price || 0) * parseInt(producto.quantity || 1);
 
       return `
-        <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative;">
-          <div class="category-indicator" style="background: ${catColor};"></div>
+        <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative; border-left: 3px solid ${catColor};">
           ${badgeExtra}
           <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
           <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
-            <div class="product-name">${escapeHtml(producto.name)}</div>
+            <div class="product-name-row">
+              <span class="cat-dot" style="background: ${catColor};"></span>
+              <span class="product-name">${escapeHtml(producto.name)}</span>
+            </div>
             <div class="product-subtotal">
               $${formatear(producto.price || 0)} × ${producto.quantity} = <b>$${formatear(subtotalReal)}</b>
             </div>
