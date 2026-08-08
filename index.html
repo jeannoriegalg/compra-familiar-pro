@@ -1,1144 +1,1412 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="theme-color" content="#F7F6F2" />
-<title>Compra Familiar</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Compra Familiar Pro</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-  :root{
-    /* ---- Papel / tinta ---- */
-    --paper:        #F7F6F2;
-    --paper-raised: #FFFFFF;
-    --paper-sunk:   #EFEDE4;
-    --ink:          #1E2420;
-    --ink-2:        #565D55;
-    --ink-3:        #9A9C93;
-    --line:         #E1DED2;
-    --line-strong:  #CFCBBB;
+  <style>
+    :root {
+      --primary-red: #ff3b30;
+      --primary-blue: #007aff;
+      --primary-green: #28a745;
+      --soft-green-bg: #e8f5e9;
+      --dark-green-text: #1b5e20;
+      --light-gray: #f5f5f7;
+      --text-dark: #1d1d1f;
+      --text-gray: #8e8e93;
+      --border-color: #e0e0e0;
 
-    /* ---- Marca ---- */
-    --brand:      #2B6B4A;
-    --brand-deep: #1F4E37;
-    --brand-soft: #E6EFE9;
-    --tomato:      #C0503D;
-    --tomato-soft: #F7E8E4;
-    --gold:        #A9812F;
-    --gold-soft:   #F3ECD9;
+      /* Colores por categoría */
+      --cat-lacteos: #4a90e2;
+      --cat-carnes: #e74c3c;
+      --cat-verduras: #27ae60;
+      --cat-frutas: #e91e63;
+      --cat-panaderia: #f39c12;
+      --cat-bebidas: #9b59b6;
+      --cat-despensa: #e67e22;
+      --cat-limpieza: #1abc9c;
+      --cat-farmacia: #9c27b0;
+      --cat-vehiculo: #607d8b;
+      --cat-otros: #95a5a6;
+    }
 
-    /* ---- Categorías (paleta sobria) ---- */
-    --cat-lacteos:    #5B84A8;
-    --cat-carnes:     #B85450;
-    --cat-verduras:   #4C8B5A;
-    --cat-frutas:     #B15A82;
-    --cat-panaderia:  #AD8A3F;
-    --cat-bebidas:    #7B5EA0;
-    --cat-despensa:   #B17438;
-    --cat-limpieza:   #3F9488;
-    --cat-farmacia:   #8A4F9E;
-    --cat-vehiculo:   #5C6B73;
-    --cat-otros:      #9A9488;
+    * { 
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
 
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --shadow-sm: 0 1px 2px rgba(30,36,32,.06);
-    --shadow-md: 0 6px 20px rgba(30,36,32,.08);
-    --shadow-lg: 0 14px 34px rgba(30,36,32,.14);
-  }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+    }
 
-  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ margin:0; padding:0; height:100%; }
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    padding-bottom:118px;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
+    body {
+      background-color: #fafafa;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-dark);
+      padding-bottom: 110px;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  ::selection{ background:var(--brand-soft); color:var(--brand-deep); }
+    /* Header compacto */
+    .navbar-custom {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      gap: 9px;
+    }
 
-  button{ font-family:inherit; }
-  button:focus-visible, input:focus-visible, .item-check:focus-visible{
-    outline:2px solid var(--brand);
-    outline-offset:2px;
-  }
+    .navbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
 
-  .mono{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
-  .display{ font-family:'Space Grotesk',sans-serif; }
+    .status-dot {
+      height: 8px;
+      width: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 6px;
+      animation: pulse 2s infinite;
+    }
 
-  /* ================= HEADER ================= */
-  .topbar{
-    position:sticky; top:0; z-index:1000;
-    background:var(--paper);
-    border-bottom:1px solid var(--line);
-    padding:12px 14px 10px;
-  }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .online { background-color: var(--primary-green); }
+    .offline { background-color: var(--primary-red); }
 
-  .brand-row{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:10px;
-  }
+    .tasa-input {
+      border: none;
+      background: var(--light-gray);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      width: 85px;
+      text-align: center;
+    }
 
-  .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .tasa-input:focus {
+      outline: 2px solid var(--primary-blue);
+      background: white;
+    }
 
-  .brand-mark{
-    width:34px; height:34px; border-radius:10px;
-    background:var(--ink); color:var(--paper);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
-    flex-shrink:0;
-  }
+    /* Barra de búsqueda compacta */
+    .search-bar {
+      width: 100%;
+      padding: 9px 12px;
+      border: none;
+      background: var(--light-gray);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
 
-  .brand-text{ display:flex; flex-direction:column; line-height:1.2; min-width:0; }
-  .brand-name{
-    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15.5px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .brand-status{
-    display:flex; align-items:center; gap:5px;
-    font-size:11px; color:var(--ink-3); font-weight:500;
-  }
-  .dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .dot.online{ background:var(--brand); animation:pulse 2.4s infinite; }
-  .dot.offline{ background:var(--tomato); }
-  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+    .search-bar:focus {
+      outline: none;
+      background: white;
+      box-shadow: 0 0 0 2px var(--primary-blue);
+    }
 
-  .topbar-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    /* Tira de categorías compacta (para filtrar, ya no agrupan) */
+    .category-filter {
+      position: sticky;
+      top: 77px;
+      z-index: 999;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 14px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      scrollbar-width: none;
+    }
 
-  .rate-chip{
-    display:flex; align-items:center; gap:4px;
-    background:var(--gold-soft); border-radius:999px;
-    padding:5px 6px 5px 10px;
-  }
-  .rate-chip-label{ font-size:10px; font-weight:700; color:var(--gold); letter-spacing:.02em; }
-  .rate-chip input{
-    width:58px; border:none; background:transparent; text-align:right;
-    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; color:var(--ink);
-    padding:2px 4px;
-  }
+    .category-filter::-webkit-scrollbar { display: none; }
 
-  .counter-badge{
-    min-width:22px; height:22px; padding:0 6px; border-radius:999px;
-    background:var(--ink); color:var(--paper);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:11px;
-  }
+    .category-chip {
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      background: var(--light-gray);
+      color: var(--text-dark);
+      flex-shrink: 0;
+    }
 
-  .search-row{
-    position:relative; margin-bottom:10px;
-  }
-  .search-row svg{
-    position:absolute; left:12px; top:50%; transform:translateY(-50%);
-    width:16px; height:16px; stroke:var(--ink-3); pointer-events:none;
-  }
-  .search-input{
-    width:100%; border:1px solid var(--line); background:var(--paper-raised);
-    border-radius:var(--radius-md); padding:10px 12px 10px 34px;
-    font-size:14px; font-weight:500; color:var(--ink);
-    transition:box-shadow .15s ease, border-color .15s ease;
-  }
-  .search-input::placeholder{ color:var(--ink-3); font-weight:400; }
-  .search-input:focus{
-    outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft);
-  }
+    .category-chip:active { transform: scale(0.95); }
 
-  .chip-row{
-    display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:1px;
-  }
-  .chip-row::-webkit-scrollbar{ display:none; }
+    .category-chip.active {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-width: 2px;
+      border-style: solid;
+      color: white !important;
+    }
 
-  .chip{
-    display:flex; align-items:center; gap:6px; flex-shrink:0; cursor:pointer;
-    padding:6px 12px 6px 9px; border-radius:999px; border:1px solid var(--line);
-    background:var(--paper-raised); font-size:12px; font-weight:600; color:var(--ink-2);
-    transition:all .15s ease;
-  }
-  .chip:active{ transform:scale(.96); }
-  .chip-dot{ width:7px; height:7px; border-radius:50%; background:var(--ink-3); flex-shrink:0; }
-  .chip.active{
-    background:var(--chip-color, var(--ink)); border-color:var(--chip-color, var(--ink)); color:#fff;
-  }
-  .chip.active .chip-dot{ background:#fff; }
+    .category-chip[data-cat="todos"].active { background: var(--text-dark); border-color: var(--text-dark); }
+    .category-chip[data-cat="lacteos"].active { background: var(--cat-lacteos); border-color: var(--cat-lacteos); }
+    .category-chip[data-cat="carnes"].active { background: var(--cat-carnes); border-color: var(--cat-carnes); }
+    .category-chip[data-cat="verduras"].active { background: var(--cat-verduras); border-color: var(--cat-verduras); }
+    .category-chip[data-cat="frutas"].active { background: var(--cat-frutas); border-color: var(--cat-frutas); }
+    .category-chip[data-cat="panaderia"].active { background: var(--cat-panaderia); border-color: var(--cat-panaderia); }
+    .category-chip[data-cat="bebidas"].active { background: var(--cat-bebidas); border-color: var(--cat-bebidas); }
+    .category-chip[data-cat="despensa"].active { background: var(--cat-despensa); border-color: var(--cat-despensa); }
+    .category-chip[data-cat="limpieza"].active { background: var(--cat-limpieza); border-color: var(--cat-limpieza); }
+    .category-chip[data-cat="farmacia"].active { background: var(--cat-farmacia); border-color: var(--cat-farmacia); }
+    .category-chip[data-cat="vehiculo"].active { background: var(--cat-vehiculo); border-color: var(--cat-vehiculo); }
+    .category-chip[data-cat="otros"].active { background: var(--cat-otros); border-color: var(--cat-otros); }
 
-  /* ================= LISTA ================= */
-  .list{ padding:6px 0 4px; }
+    .category-section { margin-bottom: 4px; }
 
-  .section-divider{
-    display:flex; align-items:center; gap:10px;
-    margin:20px 14px 6px; color:var(--ink-3);
-    font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600;
-    text-transform:uppercase; letter-spacing:.06em;
-  }
-  .section-divider::before, .section-divider::after{
-    content:''; flex:1; border-top:1px dashed var(--line-strong);
-  }
+    .product-list { padding: 4px 0 0; }
 
-  .item{
-    display:flex; align-items:center; gap:10px;
-    padding:11px 14px; background:var(--paper-raised);
-    border-bottom:1px solid var(--line);
-    position:relative;
-  }
-  .item:active{ background:var(--paper-sunk); }
+    /* Productos: lista única, alfabética, con marca de categoría discreta */
+    .product-item {
+      display: flex;
+      padding: 11px 14px 11px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+      background: white;
+      transition: all 0.2s ease;
+      position: relative;
+    }
 
-  .item.purchased{ background:var(--paper-sunk); }
-  .item.purchased .item-name{ color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--line-strong); }
-  .item.purchased .item-leader{ opacity:.4; }
+    .product-item:active { background: var(--light-gray); }
 
-  @keyframes pulseGold{
-    0%{ box-shadow:inset 0 0 0 1px var(--gold), 0 0 0 0 rgba(169,129,47,.35); }
-    100%{ box-shadow:inset 0 0 0 1px transparent, 0 0 0 10px rgba(169,129,47,0); }
-  }
-  .item.just-purchased{ animation:pulseGold 1.6s ease-out; }
+    .comprado {
+      background-color: var(--soft-green-bg) !important;
+      opacity: 0.9;
+    }
 
-  .item-check{
-    width:26px; height:26px; border-radius:50%; flex-shrink:0;
-    border:2px solid var(--cat-color, var(--ink-3));
-    background:transparent; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition:background .2s ease, border-color .2s ease, transform .15s ease;
-  }
-  .item-check:active{ transform:scale(.9); }
-  .item.purchased .item-check{
-    background:var(--brand); border-color:var(--brand);
-    animation:checkPop .35s ease;
-  }
-  @keyframes checkPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.28); } 100%{ transform:scale(1); } }
-  .item-check svg{
-    width:13px; height:13px; stroke:#fff; opacity:0; transform:scale(.5);
-    transition:opacity .18s ease .05s, transform .18s ease .05s;
-  }
-  .item.purchased .item-check svg{ opacity:1; transform:scale(1); }
+    .comprado .product-name {
+      color: var(--dark-green-text);
+      text-decoration: line-through;
+    }
 
-  .item-body{ flex:1; min-width:0; cursor:pointer; }
-  .item-top{ display:flex; align-items:baseline; gap:6px; }
-  .item-name{
-    font-size:14px; font-weight:600; color:var(--ink);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:3;
-  }
-  .item-leader{
-    flex:1; min-width:10px; height:0; align-self:center;
-    border-bottom:2px dotted var(--line-strong); margin:0 2px;
-  }
-  .item-meta{ font-size:11px; color:var(--ink-3); margin-top:2px; }
-  .item-meta b{ color:var(--ink-2); font-weight:600; }
+    @keyframes highlightPurchase {
+      0% { background-color: #fff3cd; transform: scale(1); }
+      50% { background-color: #ffe69c; transform: scale(1.02); }
+      100% { background-color: var(--soft-green-bg); transform: scale(1); }
+    }
 
-  .item-price{
-    flex-shrink:0; border:none; background:var(--tomato-soft); color:var(--tomato);
-    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px;
-    border-radius:var(--radius-sm); padding:7px 8px; min-width:64px; text-align:center;
-    cursor:pointer; transition:transform .12s ease, background .15s ease;
-  }
-  .item-price:active{ transform:scale(.94); background:#f0d9d2; }
-  .item.purchased .item-price{ background:var(--brand-soft); color:var(--brand-deep); }
+    .product-item.just-purchased {
+      animation: highlightPurchase 3s ease-out;
+      border-left: 4px solid #ffc107;
+    }
 
-  .item-qty{ display:flex; align-items:center; gap:4px; flex-shrink:0; }
-  .qty-btn{
-    width:25px; height:25px; border-radius:50%; border:1px solid var(--line-strong);
-    background:var(--paper-raised); color:var(--ink); font-size:15px; font-weight:600;
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-    transition:background .15s ease, transform .12s ease;
-  }
-  .qty-btn:active{ background:var(--paper-sunk); transform:scale(.92); }
-  .qty-value{ min-width:16px; text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px; }
+    .just-added-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #ffc107;
+      color: #000;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      animation: fadeOut 3s ease-out 2s forwards;
+      z-index: 10;
+    }
 
-  .item-delete{
-    flex-shrink:0; border:none; background:transparent; color:var(--ink-3);
-    width:24px; height:24px; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; border-radius:50%; transition:color .15s ease, background .15s ease;
-  }
-  .item-delete:active{ color:var(--tomato); background:var(--tomato-soft); }
-  .item-delete svg{ width:15px; height:15px; }
+    @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-  @media (max-width:380px){
-    .item{ padding:10px 10px; gap:8px; }
-    .item-price{ min-width:56px; font-size:12px; padding:6px; }
-    .qty-btn{ width:23px; height:23px; }
-  }
+    .product-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #f0f0f2;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
 
-  /* ================= ESTADOS VACÍOS ================= */
-  .empty-state{
-    text-align:center; padding:64px 24px 40px; color:var(--ink-3);
-  }
-  .empty-state svg{ width:44px; height:44px; stroke:var(--line-strong); margin-bottom:14px; }
-  .empty-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; color:var(--ink-2); }
-  .empty-sub{ font-size:13px; margin-top:6px; }
+    .product-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
 
-  /* ================= FOOTER ================= */
-  .summary-bar{
-    position:fixed; bottom:0; width:100%; z-index:1000;
-    background:var(--paper-raised);
-    border-top:1px solid var(--line);
-    box-shadow:0 -8px 24px rgba(30,36,32,.08);
-    display:flex; align-items:stretch;
-    padding-bottom:env(safe-area-inset-bottom);
-  }
-  .summary-block{
-    flex:1; padding:11px 8px; display:flex; flex-direction:column; align-items:center;
-    border:none; background:transparent; cursor:default;
-  }
-  .summary-action{ cursor:pointer; transition:background .15s ease; }
-  .summary-action:active{ background:var(--paper-sunk); }
-  .summary-divider{ width:1px; background:var(--line); margin:10px 0; }
-  .summary-label{
-    font-family:'Space Grotesk',sans-serif; font-size:10px; font-weight:600; text-transform:uppercase;
-    letter-spacing:.07em; color:var(--ink-3);
-  }
-  .summary-value{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:19px; margin-top:2px; }
-  .summary-value.tomato{ color:var(--tomato); }
-  .summary-value.brand{ color:var(--brand); }
-  .summary-sub{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-3); margin-top:1px; }
+    .product-name-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 2px;
+    }
 
-  /* ================= FABs ================= */
-  .fab-primary, .fab-secondary{
-    position:fixed; right:16px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; z-index:1001; border:none; transition:transform .15s ease;
-  }
-  .fab-primary{
-    bottom:132px; width:52px; height:52px;
-    background:var(--ink); color:var(--paper); box-shadow:var(--shadow-lg);
-  }
-  .fab-primary svg{ width:22px; height:22px; stroke:var(--paper); }
-  .fab-secondary{
-    bottom:196px; width:42px; height:42px;
-    background:var(--paper-raised); border:1px solid var(--line-strong); box-shadow:var(--shadow-md);
-  }
-  .fab-secondary svg{ width:18px; height:18px; stroke:var(--ink-2); }
-  .fab-primary:active, .fab-secondary:active{ transform:scale(.92); }
+    .cat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-  /* ================= LOADER / TOASTS ================= */
-  #loader{
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2000; display:none;
-  }
-  .spinner{
-    width:34px; height:34px; border:3px solid var(--line); border-top:3px solid var(--brand);
-    border-radius:50%; animation:spin .8s linear infinite;
-  }
-  @keyframes spin{ 100%{ transform:rotate(360deg); } }
+    .product-name {
+      font-size: 14px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  .toast-container{
-    position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:3000;
-    display:flex; flex-direction:column; align-items:center; gap:6px;
-    padding-top:env(safe-area-inset-top);
-  }
-  .custom-toast{
-    background:var(--ink); color:var(--paper); padding:8px 16px; border-radius:999px;
-    font-size:12px; font-weight:500; animation:fadeInOut 3s ease; box-shadow:var(--shadow-md);
-  }
-  .custom-toast.error{ background:var(--tomato); }
-  @keyframes fadeInOut{
-    0%{ opacity:0; transform:translateY(-8px); }
-    12%{ opacity:1; transform:translateY(0); }
-    88%{ opacity:1; transform:translateY(0); }
-    100%{ opacity:0; transform:translateY(-8px); }
-  }
+    .product-subtotal {
+      font-size: 11px;
+      color: var(--text-gray);
+    }
 
-  .toast-purchase{
-    background:var(--brand-deep); color:#fff; padding:10px 14px; border-radius:var(--radius-md);
-    font-size:13px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-md);
-    animation:slideIn .25s ease-out;
-  }
-  .toast-purchase b{ font-weight:600; }
-  .toast-purchase .undo-btn{
-    background:rgba(255,255,255,.16); border:none; color:#fff; padding:4px 10px;
-    border-radius:999px; cursor:pointer; font-size:11px; font-weight:600;
-  }
-  @keyframes slideIn{ from{ transform:translateY(-14px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+    .price-badge {
+      background: rgba(255, 59, 48, 0.08);
+      color: var(--primary-red);
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      min-width: 65px;
+      text-align: center;
+      padding: 6px 6px;
+      margin: 0 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
-  /* ================= MODALES (SweetAlert2) ================= */
-  .swal2-top{ align-items:flex-start !important; }
-  .modal-top .swal2-popup{
-    margin-top:56px !important; padding:0 !important; max-width:380px !important; width:92vw !important;
-    border-radius:var(--radius-lg) !important; font-family:'Inter',sans-serif !important;
-    display:flex !important; flex-direction:column !important; overflow:hidden !important;
-  }
-  .modal-top .swal2-header{ padding:18px 18px 6px !important; margin:0 !important; }
-  .modal-top .swal2-title{
-    font-family:'Space Grotesk',sans-serif !important; font-size:17px !important; font-weight:700 !important;
-    color:var(--ink) !important; margin:0 !important; padding:0 !important;
-  }
-  .modal-top .swal2-html-container{ margin:0 !important; padding:0 18px 8px !important; font-size:12.5px !important; color:var(--ink-2) !important; }
-  .modal-top .swal2-input, .modal-top .swal2-select{
-    font-family:'IBM Plex Mono',monospace !important; font-size:16px !important; padding:12px !important;
-    margin:6px 18px !important; border-radius:var(--radius-sm) !important; text-align:center !important;
-    font-weight:600 !important; width:calc(100% - 36px) !important; box-sizing:border-box !important;
-    border:1.5px solid var(--line-strong) !important; color:var(--ink) !important;
-  }
-  .modal-top .swal2-select{ font-family:'Inter',sans-serif !important; }
-  .modal-top .swal2-input:focus, .modal-top .swal2-select:focus{
-    border-color:var(--brand) !important; box-shadow:0 0 0 3px var(--brand-soft) !important;
-  }
-  .modal-top .swal2-actions{
-    margin:0 !important; padding:14px !important; background:var(--paper) !important;
-    border-top:1px solid var(--line) !important; width:100% !important; box-sizing:border-box !important;
-    display:flex !important; flex-direction:column !important; gap:8px !important;
-  }
-  .modal-top .swal2-confirm, .modal-top .swal2-deny, .modal-top .swal2-cancel{
-    font-family:'Inter',sans-serif !important; font-size:14.5px !important; padding:12px 16px !important;
-    margin:0 !important; border-radius:var(--radius-sm) !important; font-weight:600 !important;
-    width:100% !important; box-sizing:border-box !important; box-shadow:none !important;
-  }
-  .modal-top .swal2-confirm{ background:var(--brand) !important; order:1 !important; }
-  .modal-top .swal2-deny{ background:var(--ink) !important; order:2 !important; }
-  .modal-top .swal2-cancel{ background:var(--paper-sunk) !important; color:var(--ink-2) !important; order:3 !important; }
-  .modal-top .swal2-validation-message{ font-size:11.5px !important; padding:0 18px !important; margin:4px 0 !important; background:transparent !important; color:var(--tomato) !important; }
-  .modal-top .swal2-icon{ margin-top:6px !important; }
+    .price-badge:active {
+      background: rgba(255, 59, 48, 0.15);
+      transform: scale(0.95);
+    }
 
-  .modal-historial .swal2-popup{ width:95vw !important; max-width:500px !important; }
-  .modal-historial .swal2-actions{ flex-direction:row !important; justify-content:center !important; }
-  .modal-historial .swal2-confirm{ width:auto !important; min-width:120px !important; }
+    .comprado .price-badge {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--primary-green);
+    }
 
-  @media (prefers-reduced-motion:reduce){
-    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
-  }
-</style>
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 6px;
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f0f0f2;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .qty-btn:active { background: #ddd; transform: scale(0.95); }
+
+    .qty-value {
+      font-weight: 600;
+      min-width: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* Footer más compacto */
+    .footer-resumen {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 1000;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .total-box {
+      text-align: center;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .total-box:active { opacity: 0.7; }
+
+    .total-label {
+      font-size: 10px;
+      color: var(--text-gray);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .total-val {
+      font-size: 18px;
+      font-weight: 700;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .divider {
+      width: 1px;
+      background: var(--border-color);
+      height: 35px;
+      align-self: center;
+      margin: 0 6px;
+    }
+
+    .btn-fab {
+      position: fixed;
+      bottom: 90px;
+      right: 16px;
+      width: 50px;
+      height: 50px;
+      background: var(--text-dark);
+      color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-fab:active { transform: scale(0.95); }
+
+    #loader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2000;
+      display: none;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .archived-section {
+      background: #f8f8f8;
+      padding: 8px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+
+    @media (max-width: 480px) {
+      .product-item { padding: 10px 12px 10px 10px; }
+      .product-name { font-size: 13px; }
+      .price-badge { min-width: 60px; font-size: 12px; padding: 5px 5px; }
+      .qty-btn { width: 26px; height: 26px; font-size: 15px; }
+      .product-img { width: 36px; height: 36px; margin-right: 8px; }
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+    }
+
+    .custom-toast {
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      animation: fadeInOut 3s ease;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+
+    .toast-purchase {
+      background: rgba(40, 167, 69, 0.95);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast-purchase .undo-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .btn-history {
+      position: fixed;
+      bottom: 90px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
+      background: var(--primary-blue);
+      color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-history:active { transform: scale(0.95); }
+
+    /* Modal en parte superior */
+    .swal2-top { align-items: flex-start !important; }
+
+    .modal-top .swal2-popup {
+      margin-top: 60px !important;
+      padding: 0 !important;
+      max-width: 380px !important;
+      width: 92vw !important;
+      border-radius: 20px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+
+    .modal-top .swal2-header {
+      padding: 16px 16px 8px !important;
+      margin: 0 !important;
+    }
+
+    .modal-top .swal2-title {
+      font-size: 18px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .modal-top .swal2-html-container {
+      margin: 0 !important;
+      padding: 0 16px 8px !important;
+      font-size: 12px !important;
+      flex: 1 !important;
+    }
+
+    .modal-top .swal2-input,
+    .modal-top .swal2-select {
+      font-size: 16px !important;
+      padding: 12px !important;
+      margin: 6px 16px !important;
+      height: auto !important;
+      border-radius: 10px !important;
+      text-align: center !important;
+      font-weight: 600 !important;
+      width: calc(100% - 32px) !important;
+      box-sizing: border-box !important;
+    }
+
+    .modal-top .swal2-actions {
+      margin: 0 !important;
+      padding: 12px !important;
+      background: #f8f9fa !important;
+      border-top: 1px solid #e0e0e0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+    }
+
+    .modal-top .swal2-confirm,
+    .modal-top .swal2-deny,
+    .modal-top .swal2-cancel {
+      font-size: 15px !important;
+      padding: 12px 16px !important;
+      margin: 0 !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .modal-top .swal2-cancel {
+      background: #f0f0f2 !important;
+      color: #666 !important;
+      order: 3 !important;
+    }
+
+    .modal-top .swal2-deny { order: 2 !important; }
+    .modal-top .swal2-confirm { order: 1 !important; }
+
+    .modal-top .swal2-validation-message {
+      font-size: 11px !important;
+      padding: 0 16px !important;
+      margin: 4px 0 !important;
+    }
+
+    .modal-historial .swal2-popup {
+      width: 95vw !important;
+      max-width: 500px !important;
+    }
+
+    .modal-historial .swal2-actions {
+      flex-direction: row !important;
+      justify-content: center !important;
+    }
+
+    .modal-historial .swal2-confirm {
+      width: auto !important;
+      min-width: 100px !important;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="loader"><div class="spinner"></div></div>
-<div id="toastContainer" class="toast-container"></div>
+  <div id="loader"><div class="spinner"></div></div>
+  <div id="toastContainer" class="toast-container"></div>
 
-<header class="topbar">
-  <div class="brand-row">
-    <div class="brand">
-      <span class="brand-mark">CF</span>
-      <div class="brand-text">
-        <span class="brand-name">Compra Familiar</span>
-        <span class="brand-status"><i id="statusDot" class="dot online"></i><span id="statusText">En línea</span></span>
+  <!-- Header compacto -->
+  <div class="navbar-custom">
+    <div class="navbar-top">
+      <div>
+        <input type="text" id="tasaCambio" class="tasa-input" placeholder="Tasa" onchange="actualizarTasa(this.value)">
+      </div>
+      <div style="font-weight: 700; font-size: 15px;">
+        Compra Fam Pro
+        <span id="onlineStatus" class="status-dot online"></span>
+      </div>
+      <div>
+        <span id="contadorItems" class="badge rounded-pill bg-danger" style="font-size: 11px;">0</span>
       </div>
     </div>
-    <div class="topbar-actions">
-      <label class="rate-chip">
-        <span class="rate-chip-label">Bs</span>
-        <input type="text" id="tasaCambio" inputmode="decimal" onchange="actualizarTasa(this.value)">
-      </label>
-      <span id="contadorItems" class="counter-badge">0</span>
+    <input type="text" class="search-bar" placeholder="🔍 Buscar producto..." id="searchInput" oninput="filtrarProductos()">
+  </div>
+
+  <!-- Tira de categorías: solo filtra, ya no agrupa -->
+  <div class="category-filter" id="categoryFilter">
+    <div class="category-chip active" data-cat="todos" onclick="filtrarCategoria('todos')">📋 Todos</div>
+    <div class="category-chip" data-cat="lacteos" onclick="filtrarCategoria('lacteos')">🥛 Lácteos</div>
+    <div class="category-chip" data-cat="carnes" onclick="filtrarCategoria('carnes')">🥩 Carnes</div>
+    <div class="category-chip" data-cat="verduras" onclick="filtrarCategoria('verduras')">🥬 Verduras</div>
+    <div class="category-chip" data-cat="frutas" onclick="filtrarCategoria('frutas')">🍎 Frutas</div>
+    <div class="category-chip" data-cat="panaderia" onclick="filtrarCategoria('panaderia')">🍞 Panadería</div>
+    <div class="category-chip" data-cat="bebidas" onclick="filtrarCategoria('bebidas')">🥤 Bebidas</div>
+    <div class="category-chip" data-cat="despensa" onclick="filtrarCategoria('despensa')">🥫 Despensa</div>
+    <div class="category-chip" data-cat="limpieza" onclick="filtrarCategoria('limpieza')">🧹 Limpieza</div>
+    <div class="category-chip" data-cat="farmacia" onclick="filtrarCategoria('farmacia')">🏥 Farmacia</div>
+    <div class="category-chip" data-cat="vehiculo" onclick="filtrarCategoria('vehiculo')">🚗 Vehículo</div>
+    <div class="category-chip" data-cat="otros" onclick="filtrarCategoria('otros')">📦 Otros</div>
+  </div>
+
+  <!-- Lista de Productos -->
+  <div id="listaProductos" class="product-list"></div>
+
+  <button class="btn-fab" onclick="nuevoProducto()">+</button>
+  <button class="btn-history" onclick="mostrarHistorial()" title="Ver historial">📋</button>
+
+  <!-- Footer compacto -->
+  <div class="footer-resumen">
+    <div class="total-box">
+      <span class="total-label">Faltante</span>
+      <span id="totalPendiente" class="total-val" style="color: var(--primary-red);">$0,00</span>
+    </div>
+    <div class="divider"></div>
+    <div class="total-box" onclick="archivar()">
+      <span class="total-label">Archivar</span>
+      <span id="totalComprado" class="total-val" style="color: var(--primary-green);">$0,00</span>
+      <small id="totalBs" class="text-muted fw-bold" style="font-size: 9px; display: block; margin-top: 1px;">Bs. 0,00</small>
     </div>
   </div>
 
-  <div class="search-row">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" class="search-input" id="searchInput" placeholder="Buscar producto…" oninput="filtrarProductos()">
-  </div>
+  <script>
+    const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
 
-  <div class="chip-row" id="categoryFilter">
-    <div class="chip active" data-cat="todos" onclick="filtrarCategoria('todos')"><span class="chip-dot"></span>Todos</div>
-    <div class="chip" data-cat="lacteos" onclick="filtrarCategoria('lacteos')" style="--chip-color:var(--cat-lacteos)"><span class="chip-dot" style="background:var(--cat-lacteos)"></span>Lácteos</div>
-    <div class="chip" data-cat="carnes" onclick="filtrarCategoria('carnes')" style="--chip-color:var(--cat-carnes)"><span class="chip-dot" style="background:var(--cat-carnes)"></span>Carnes</div>
-    <div class="chip" data-cat="verduras" onclick="filtrarCategoria('verduras')" style="--chip-color:var(--cat-verduras)"><span class="chip-dot" style="background:var(--cat-verduras)"></span>Verduras</div>
-    <div class="chip" data-cat="frutas" onclick="filtrarCategoria('frutas')" style="--chip-color:var(--cat-frutas)"><span class="chip-dot" style="background:var(--cat-frutas)"></span>Frutas</div>
-    <div class="chip" data-cat="panaderia" onclick="filtrarCategoria('panaderia')" style="--chip-color:var(--cat-panaderia)"><span class="chip-dot" style="background:var(--cat-panaderia)"></span>Panadería</div>
-    <div class="chip" data-cat="bebidas" onclick="filtrarCategoria('bebidas')" style="--chip-color:var(--cat-bebidas)"><span class="chip-dot" style="background:var(--cat-bebidas)"></span>Bebidas</div>
-    <div class="chip" data-cat="despensa" onclick="filtrarCategoria('despensa')" style="--chip-color:var(--cat-despensa)"><span class="chip-dot" style="background:var(--cat-despensa)"></span>Despensa</div>
-    <div class="chip" data-cat="limpieza" onclick="filtrarCategoria('limpieza')" style="--chip-color:var(--cat-limpieza)"><span class="chip-dot" style="background:var(--cat-limpieza)"></span>Limpieza</div>
-    <div class="chip" data-cat="farmacia" onclick="filtrarCategoria('farmacia')" style="--chip-color:var(--cat-farmacia)"><span class="chip-dot" style="background:var(--cat-farmacia)"></span>Farmacia</div>
-    <div class="chip" data-cat="vehiculo" onclick="filtrarCategoria('vehiculo')" style="--chip-color:var(--cat-vehiculo)"><span class="chip-dot" style="background:var(--cat-vehiculo)"></span>Vehículo</div>
-    <div class="chip" data-cat="otros" onclick="filtrarCategoria('otros')" style="--chip-color:var(--cat-otros)"><span class="chip-dot" style="background:var(--cat-otros)"></span>Otros</div>
-  </div>
-</header>
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<main id="listaProductos" class="list"></main>
+    let productos = [];
+    let exchangeRate = 36.50;
+    let realtimeChannel = null;
+    let ultimoProductoComprado = null;
+    let timeoutHighlight = null;
+    let modalAbierto = false;
+    let categoriaActual = 'todos';
+    let busquedaActual = '';
 
-<button class="fab-secondary" onclick="mostrarHistorial()" aria-label="Ver historial">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
-</button>
-<button class="fab-primary" onclick="nuevoProducto()" aria-label="Agregar producto">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
-
-<footer class="summary-bar">
-  <div class="summary-block">
-    <span class="summary-label">Falta</span>
-    <span id="totalPendiente" class="summary-value tomato">$0,00</span>
-  </div>
-  <div class="summary-divider"></div>
-  <button class="summary-block summary-action" onclick="archivar()">
-    <span class="summary-label">Archivar carrito</span>
-    <span id="totalComprado" class="summary-value brand">$0,00</span>
-    <span id="totalBs" class="summary-sub">Bs 0,00</span>
-  </button>
-</footer>
-
-<script>
-  const SUPABASE_URL = 'https://xqfdgyaukxjlzpmchhzr.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxZmRneWF1a3hqbHpwbWNoaHpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDIyMDYsImV4cCI6MjA5NzcxODIwNn0.S5tn9_Dkund3H_bP3uWlYsYgxnokrfiUwlHa0c6bM-E';
-
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  let productos = [];
-  let exchangeRate = 36.50;
-  let realtimeChannel = null;
-  let ultimoProductoComprado = null;
-  let timeoutHighlight = null;
-  let modalAbierto = false;
-  let categoriaActual = 'todos';
-  let busquedaActual = '';
-
-  const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-  const ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
-
-  document.addEventListener('DOMContentLoaded', () => {
-    cargarDatosIniciales();
-    suscribirseACambios();
-  });
-
-  async function cargarDatosIniciales() {
-    showLoader(true);
-    try {
-      const { data: configData, error: configError } = await supabaseClient
-        .from('config').select('exchange_rate').single();
-      if (configError) throw configError;
-      exchangeRate = configData?.exchange_rate || 36.50;
-      document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
-
-      const { data: productsData, error: productsError } = await supabaseClient
-        .from('products').select('*').order('created_at', { ascending: false });
-      if (productsError) throw productsError;
-      productos = productsData || [];
-
-      renderizar();
-      showToast('Sincronizado');
-    } catch (error) {
-      console.error('Error:', error);
-      showToast('Error de conexión', 'error');
-      marcarOnline(false);
-    } finally {
-      showLoader(false);
-    }
-  }
-
-  function suscribirseACambios() {
-    realtimeChannel = supabaseClient
-      .channel('shopping-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' },
-        (payload) => {
-          if (modalAbierto) return;
-          sincronizarCambios(payload);
-        }
-      )
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' },
-        (payload) => {
-          exchangeRate = payload.new.exchange_rate;
-          document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
-          if (!modalAbierto) renderizar();
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') marcarOnline(true);
-        else if (status === 'CHANNEL_ERROR') marcarOnline(false);
-      });
-  }
-
-  async function sincronizarCambios(payload) {
-    const { eventType, new: nuevo, old: viejo } = payload;
-    if (eventType === 'INSERT') productos.push(nuevo);
-    else if (eventType === 'UPDATE') {
-      const index = productos.findIndex(p => p.id === nuevo.id);
-      if (index !== -1) productos[index] = nuevo;
-    } else if (eventType === 'DELETE') {
-      productos = productos.filter(p => p.id !== viejo.id);
-    }
-    renderizar();
-  }
-
-  function filtrarProductos() {
-    busquedaActual = document.getElementById('searchInput').value.toLowerCase().trim();
-    renderizar();
-  }
-
-  function filtrarCategoria(categoria) {
-    categoriaActual = categoria;
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.classList.remove('active');
-      if (chip.dataset.cat === categoria) chip.classList.add('active');
-    });
-    renderizar();
-  }
-
-  function getCategoryName(cat) {
-    const names = {
-      lacteos: 'Lácteos', carnes: 'Carnes', verduras: 'Verduras', frutas: 'Frutas',
-      panaderia: 'Panadería', bebidas: 'Bebidas', despensa: 'Despensa', limpieza: 'Limpieza',
-      farmacia: 'Farmacia', vehiculo: 'Vehículo', otros: 'Otros'
-    };
-    return names[cat] || 'Otros';
-  }
-
-  function getCategoryColor(cat) {
-    const colors = {
-      lacteos: 'var(--cat-lacteos)', carnes: 'var(--cat-carnes)', verduras: 'var(--cat-verduras)',
-      frutas: 'var(--cat-frutas)', panaderia: 'var(--cat-panaderia)', bebidas: 'var(--cat-bebidas)',
-      despensa: 'var(--cat-despensa)', limpieza: 'var(--cat-limpieza)', farmacia: 'var(--cat-farmacia)',
-      vehiculo: 'var(--cat-vehiculo)', otros: 'var(--cat-otros)'
-    };
-    return colors[cat] || 'var(--cat-otros)';
-  }
-
-  function renderizar() {
-    let productosFiltrados = [...productos];
-
-    if (busquedaActual) {
-      productosFiltrados = productosFiltrados.filter(p =>
-        p.name.toLowerCase().includes(busquedaActual)
-      );
-    }
-
-    if (categoriaActual !== 'todos') {
-      productosFiltrados = productosFiltrados.filter(p =>
-        (p.category || 'otros') === categoriaActual
-      );
-    }
-
-    const productosOrdenados = [...productosFiltrados].sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'es', { sensitivity: 'base' })
-    );
-
-    const pendientes = productosOrdenados.filter(p => p.status === 'pending');
-    const comprados = productosOrdenados.filter(p => p.status === 'purchased');
-
-    let html = '';
-    let totalPendiente = 0;
-    let totalComprado = 0;
-
-    pendientes.forEach(p => { totalPendiente += parseFloat(p.price || 0) * parseInt(p.quantity || 1); });
-    comprados.forEach(p => { totalComprado += parseFloat(p.price || 0) * parseInt(p.quantity || 1); });
-
-    // Lista única ordenada alfabéticamente, sin agrupar por categoría
-    pendientes.forEach(p => {
-      const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
-      html += crearItemHTML(p, subtotal, false, getCategoryColor(p.category || 'otros'));
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarDatosIniciales();
+      suscribirseACambios();
     });
 
-    if (comprados.length > 0) {
-      html += `<div class="section-divider"><span>En tu carrito</span></div>`;
-      comprados.forEach(p => {
-        html += crearItemHTML(p, 0, p.id === ultimoProductoComprado, getCategoryColor(p.category || 'otros'));
-      });
-    }
-
-    if (productosFiltrados.length === 0) {
-      if (productos.length === 0) {
-        html = `
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <div class="empty-title">Tu lista está vacía</div>
-            <div class="empty-sub">Toca el botón + para agregar el primer producto</div>
-          </div>`;
-      } else {
-        html = `
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <div class="empty-title">Sin resultados</div>
-            <div class="empty-sub">Prueba con otra búsqueda o categoría</div>
-          </div>`;
-      }
-    }
-
-    document.getElementById('listaProductos').innerHTML = html;
-    document.getElementById('totalPendiente').innerText = `$${formatear(totalPendiente)}`;
-    document.getElementById('totalComprado').innerText = `$${formatear(totalComprado)}`;
-    document.getElementById('totalBs').innerText = `Bs ${formatear(totalComprado * exchangeRate)}`;
-    document.getElementById('contadorItems').innerText = pendientes.length;
-
-    if (timeoutHighlight) clearTimeout(timeoutHighlight);
-    timeoutHighlight = setTimeout(() => {
-      ultimoProductoComprado = null;
-      if (productos.some(p => p.status === 'purchased')) renderizar();
-    }, 2200);
-  }
-
-  function crearItemHTML(producto, subtotal, esUltimoComprado = false, catColor = 'var(--cat-otros)') {
-    const esPendiente = producto.status === 'pending';
-    const claseExtra = esUltimoComprado ? 'just-purchased' : '';
-    const subtotalReal = parseFloat(producto.price || 0) * parseInt(producto.quantity || 1);
-
-    return `
-      <div class="item ${esPendiente ? '' : 'purchased'} ${claseExtra}" style="--cat-color:${catColor}">
-        <button class="item-check" onclick="cambiarEstado('${producto.id}', '${producto.status}')" aria-label="Marcar como comprado">${ICON_CHECK}</button>
-        <div class="item-body" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
-          <div class="item-top">
-            <span class="item-name">${escapeHtml(producto.name)}</span>
-            <span class="item-leader"></span>
-          </div>
-          <div class="item-meta">${producto.quantity} × $${formatear(producto.price || 0)} · <b>$${formatear(subtotalReal)}</b></div>
-        </div>
-        <button class="item-price" onclick="editarPrecio('${producto.id}')">$${formatear(producto.price || 0)}</button>
-        <div class="item-qty">
-          <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity - 1})">−</button>
-          <span class="qty-value">${producto.quantity}</span>
-          <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity + 1})">+</button>
-        </div>
-        <button class="item-delete" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')" aria-label="Eliminar producto">${ICON_TRASH}</button>
-      </div>`;
-  }
-
-  async function editarPrecio(productId) {
-    const producto = productos.find(p => p.id === productId);
-    if (!producto) return;
-
-    modalAbierto = true;
-
-    const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
-      title: 'Precio',
-      html: `
-        <div style="font-size:12.5px;color:var(--ink-2);margin-bottom:4px;font-weight:600;">${escapeHtml(producto.name)}</div>
-        <div style="font-size:11px;color:var(--ink-3);">Actual: $${formatear(producto.price || 0)}</div>
-      `,
-      input: 'text',
-      inputValue: formatear(producto.price || 0),
-      inputAttributes: {
-        'inputmode': 'decimal', 'enterkeyhint': 'done', 'autocomplete': 'off',
-        'autocapitalize': 'off', 'spellcheck': 'false'
-      },
-      inputValidator: (value) => {
-        if (!value || value.trim() === '') return 'Ingresa un precio';
-        const num = parseFloat(value.replace(',', '.'));
-        if (isNaN(num)) return 'Precio inválido';
-        if (num < 0) return 'No puede ser negativo';
-      },
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      denyButtonText: 'Calculadora',
-      cancelButtonText: 'Cancelar',
-      allowOutsideClick: false,
-      allowEscapeKey: true,
-      position: 'top',
-      customClass: { container: 'modal-top', popup: 'modal-top-popup' },
-      didOpen: () => {
-        setTimeout(() => {
-          const input = document.querySelector('.swal2-input');
-          if (input) { input.focus(); input.select(); }
-        }, 100);
-      }
-    });
-
-    modalAbierto = false;
-
-    if (isDenied) { await abrirCalculadoraPrecio(productId); return; }
-
-    if (isConfirmed && resultado) {
-      const precio = parseFloat(resultado.replace(',', '.')) || 0;
-      await guardarPrecio(productId, precio);
-    }
-
-    await recargarDatos();
-  }
-
-  async function abrirCalculadoraPrecio(productId) {
-    const producto = productos.find(p => p.id === productId);
-    if (!producto) return;
-
-    modalAbierto = true;
-
-    const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
-      title: 'Calculadora',
-      html: `
-        <div style="font-size:11.5px;color:var(--ink-2);margin-bottom:6px;font-weight:600;">${escapeHtml(producto.name)}</div>
-        <div style="background:var(--brand-soft);padding:8px;border-radius:8px;font-size:10.5px;color:var(--brand-deep);">
-          Ej: <code>1.2+1.5</code> · <code>10*2</code> · <code>50-10</code>
-        </div>
-      `,
-      input: 'text',
-      inputPlaceholder: '1.2+1.5+2.3',
-      inputAttributes: {
-        'inputmode': 'text', 'enterkeyhint': 'done', 'autocomplete': 'off',
-        'autocapitalize': 'off', 'spellcheck': 'false'
-      },
-      inputValidator: (value) => {
-        if (!value || value.trim() === '') return 'Ingresa una expresión';
-        try {
-          const r = evaluarExpresion(value);
-          if (isNaN(r) || !isFinite(r)) return 'Inválida';
-          if (r < 0) return 'No negativo';
-        } catch (e) { return 'Error'; }
-      },
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Asignar',
-      denyButtonText: 'Atrás',
-      cancelButtonText: 'Cancelar',
-      allowOutsideClick: false,
-      position: 'top',
-      customClass: { container: 'modal-top', popup: 'modal-top-popup' },
-      didOpen: () => {
-        setTimeout(() => {
-          const input = document.querySelector('.swal2-input');
-          if (input) input.focus();
-        }, 100);
-      }
-    });
-
-    modalAbierto = false;
-
-    if (isDenied) { await editarPrecio(productId); return; }
-
-    if (isConfirmed && resultado) {
-      try {
-        const precioFinal = evaluarExpresion(resultado);
-
-        const confirmar = await Swal.fire({
-          title: '¿Asignar?',
-          html: `
-            <div style="font-family:'IBM Plex Mono',monospace;background:var(--paper-sunk);padding:8px;border-radius:8px;margin:6px 0;">
-              ${resultado} = <b>$${formatear(precioFinal)}</b>
-            </div>
-            <div style="font-size:11px;color:var(--ink-3);">${escapeHtml(producto.name)}</div>
-          `,
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, asignar',
-          cancelButtonText: 'Cancelar',
-          position: 'top',
-          customClass: { container: 'modal-top', popup: 'modal-top-popup' }
-        });
-
-        if (confirmar.isConfirmed) {
-          await guardarPrecio(productId, precioFinal);
-          showToast(`$${formatear(precioFinal)}`);
-        } else {
-          await abrirCalculadoraPrecio(productId);
-          return;
-        }
-      } catch (e) {
-        showToast('Error', 'error');
-        await abrirCalculadoraPrecio(productId);
-        return;
-      }
-    }
-
-    await recargarDatos();
-  }
-
-  async function guardarPrecio(productId, precio) {
-    const { error } = await supabaseClient
-      .from('products').update({ price: precio }).eq('id', productId);
-    if (error) showToast('Error', 'error');
-    else showToast(`$${formatear(precio)}`);
-  }
-
-  function evaluarExpresion(expresion) {
-    let expr = expresion.replace(/,/g, '.');
-    if (!/^[\d+\-*/().\s]+$/.test(expr)) throw new Error('Caracteres no permitidos');
-    const resultado = new Function('return ' + expr)();
-    return Math.round(resultado * 100) / 100;
-  }
-
-  async function recargarDatos() {
-    try {
-      const { data, error } = await supabaseClient
-        .from('products').select('*').order('created_at', { ascending: false });
-      if (!error && data) { productos = data; renderizar(); }
-    } catch (e) { console.error('Error:', e); }
-  }
-
-  async function nuevoProducto() {
-    modalAbierto = true;
-
-    const { value: formValues, isConfirmed } = await Swal.fire({
-      title: 'Nuevo producto',
-      html: `
-        <input id="swal-nombre" class="swal2-input" placeholder="Nombre del producto" autocomplete="off">
-        <select id="swal-categoria" class="swal2-select">
-          <option value="otros">Otros</option>
-          <option value="lacteos">Lácteos</option>
-          <option value="carnes">Carnes</option>
-          <option value="verduras">Verduras</option>
-          <option value="frutas">Frutas</option>
-          <option value="panaderia">Panadería</option>
-          <option value="bebidas">Bebidas</option>
-          <option value="despensa">Despensa</option>
-          <option value="limpieza">Limpieza</option>
-          <option value="farmacia">Farmacia</option>
-          <option value="vehiculo">Vehículo</option>
-        </select>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: 'Agregar',
-      cancelButtonText: 'Cancelar',
-      position: 'top',
-      customClass: { container: 'modal-top' },
-      preConfirm: () => {
-        const nombre = document.getElementById('swal-nombre').value;
-        const categoria = document.getElementById('swal-categoria').value;
-        if (!nombre || nombre.trim() === '') {
-          Swal.showValidationMessage('Escribe un nombre');
-          return;
-        }
-        return { nombre: nombre.trim(), categoria };
-      },
-      didOpen: () => {
-        setTimeout(() => {
-          const input = document.getElementById('swal-nombre');
-          if (input) input.focus();
-        }, 100);
-      }
-    });
-
-    modalAbierto = false;
-
-    if (isConfirmed && formValues) {
+    async function cargarDatosIniciales() {
       showLoader(true);
       try {
-        const { error } = await supabaseClient
-          .from('products')
-          .insert([{
-            name: formValues.nombre,
-            category: formValues.categoria,
-            price: 0,
-            quantity: 1,
-            status: 'pending'
-          }]);
-        if (error) throw error;
-        showToast('Agregado');
-        await recargarDatos();
+        const { data: configData, error: configError } = await supabaseClient
+          .from('config').select('exchange_rate').single();
+        if (configError) throw configError;
+        exchangeRate = configData?.exchange_rate || 36.50;
+        document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
+
+        const { data: productsData, error: productsError } = await supabaseClient
+          .from('products').select('*').order('created_at', { ascending: false });
+        if (productsError) throw productsError;
+        productos = productsData || [];
+
+        renderizar();
+        showToast('Sincronizado');
       } catch (error) {
-        showToast('Error', 'error');
+        console.error('Error:', error);
+        showToast('Error de conexión', 'error');
+        marcarOnline(false);
       } finally {
         showLoader(false);
       }
     }
-  }
 
-  async function ajustarCantidad(id, nuevaCantidad) {
-    if (nuevaCantidad < 1) return;
-    const { error } = await supabaseClient
-      .from('products').update({ quantity: nuevaCantidad }).eq('id', id);
-    if (error) showToast('Error', 'error');
-  }
-
-  async function cambiarEstado(id, estadoActual) {
-    const producto = productos.find(p => p.id === id);
-    if (!producto) return;
-    const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
-
-    try {
-      const { error } = await supabaseClient
-        .from('products').update({ status: nuevoEstado }).eq('id', id);
-      if (error) { showToast('Error', 'error'); return; }
-
-      if (nuevoEstado === 'purchased') {
-        ultimoProductoComprado = id;
-        if (timeoutHighlight) clearTimeout(timeoutHighlight);
-        mostrarNotificacionConUndo(producto.name, id);
-      }
-    } catch (error) {
-      showToast('Error', 'error');
-    }
-  }
-
-  function mostrarNotificacionConUndo(nombre, productId) {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = 'toast-purchase';
-    toast.innerHTML = `
-      <span>${ICON_CHECK.replace('stroke-width="3"', 'stroke-width="3" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"')} <b>${escapeHtml(nombre)}</b></span>
-      <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">Deshacer</button>`;
-    container.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4500);
-  }
-
-  async function deshacerUltimaCompra(productId) {
-    try {
-      await supabaseClient.from('products').update({ status: 'pending' }).eq('id', productId);
-      showToast('Devuelto a la lista');
-      document.querySelectorAll('.toast-purchase').forEach(t => t.remove());
-    } catch (error) {
-      showToast('Error', 'error');
-    }
-  }
-
-  async function borrarProducto(id, nombre) {
-    const result = await Swal.fire({
-      title: '¿Eliminar producto?',
-      text: `"${nombre}"`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar',
-      position: 'top',
-      customClass: { container: 'modal-top' }
-    });
-
-    if (result.isConfirmed) {
-      showLoader(true);
-      const { error } = await supabaseClient.from('products').delete().eq('id', id);
-      showLoader(false);
-      if (error) showToast('Error', 'error');
-      else showToast('Eliminado');
-    }
-  }
-
-  async function archivar() {
-    const comprados = productos.filter(p => p.status === 'purchased');
-    if (comprados.length === 0) {
-      Swal.fire({
-        icon: 'info', title: 'Carrito vacío',
-        position: 'top',
-        customClass: { container: 'modal-top' }
-      });
-      return;
-    }
-
-    const total = comprados.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 1)), 0);
-
-    const result = await Swal.fire({
-      title: '¿Archivar carrito?',
-      html: `<div style="font-size:13.5px;"><b>${comprados.length}</b> productos · <b style="color:var(--brand);">$${formatear(total)}</b></div>`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Archivar',
-      cancelButtonText: 'Cancelar',
-      position: 'top',
-      customClass: { container: 'modal-top' }
-    });
-
-    if (result.isConfirmed) {
-      showLoader(true);
-      try {
-        const historial = comprados.map(p => ({
-          product_name: p.name,
-          price: p.price || 0,
-          quantity: p.quantity || 1,
-          total: (p.price || 0) * (p.quantity || 1)
-        }));
-        await supabaseClient.from('purchase_history').insert(historial);
-        const ids = comprados.map(p => p.id);
-        await supabaseClient.from('products').update({ status: 'pending' }).in('id', ids);
-        showLoader(false);
-        Swal.fire({
-          icon: 'success', title: 'Archivado',
-          text: `$${formatear(total)}`,
-          position: 'top',
-          customClass: { container: 'modal-top' }
+    function suscribirseACambios() {
+      realtimeChannel = supabaseClient
+        .channel('shopping-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' },
+          (payload) => {
+            if (modalAbierto) return;
+            sincronizarCambios(payload);
+          }
+        )
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' },
+          (payload) => {
+            exchangeRate = payload.new.exchange_rate;
+            document.getElementById('tasaCambio').value = exchangeRate.toString().replace('.', ',');
+            if (!modalAbierto) renderizar();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') marcarOnline(true);
+          else if (status === 'CHANNEL_ERROR') marcarOnline(false);
         });
+    }
+
+    async function sincronizarCambios(payload) {
+      const { eventType, new: nuevo, old: viejo } = payload;
+      if (eventType === 'INSERT') productos.push(nuevo);
+      else if (eventType === 'UPDATE') {
+        const index = productos.findIndex(p => p.id === nuevo.id);
+        if (index !== -1) productos[index] = nuevo;
+      } else if (eventType === 'DELETE') {
+        productos = productos.filter(p => p.id !== viejo.id);
+      }
+      renderizar();
+    }
+
+    function filtrarProductos() {
+      busquedaActual = document.getElementById('searchInput').value.toLowerCase().trim();
+      renderizar();
+    }
+
+    function filtrarCategoria(categoria) {
+      categoriaActual = categoria;
+      document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.classList.remove('active');
+        if (chip.dataset.cat === categoria) chip.classList.add('active');
+      });
+      renderizar();
+    }
+
+    function getCategoryName(cat) {
+      const names = {
+        lacteos: '🥛 Lácteos',
+        carnes: '🥩 Carnes',
+        verduras: '🥬 Verduras',
+        frutas: '🍎 Frutas',
+        panaderia: '🍞 Panadería',
+        bebidas: '🥤 Bebidas',
+        despensa: '🥫 Despensa',
+        limpieza: '🧹 Limpieza',
+        farmacia: '🏥 Farmacia',
+        vehiculo: '🚗 Vehículo',
+        otros: '📦 Otros'
+      };
+      return names[cat] || '📦 Otros';
+    }
+
+    function getCategoryColor(cat) {
+      const colors = {
+        lacteos: 'var(--cat-lacteos)',
+        carnes: 'var(--cat-carnes)',
+        verduras: 'var(--cat-verduras)',
+        frutas: 'var(--cat-frutas)',
+        panaderia: 'var(--cat-panaderia)',
+        bebidas: 'var(--cat-bebidas)',
+        despensa: 'var(--cat-despensa)',
+        limpieza: 'var(--cat-limpieza)',
+        farmacia: 'var(--cat-farmacia)',
+        vehiculo: 'var(--cat-vehiculo)',
+        otros: 'var(--cat-otros)'
+      };
+      return colors[cat] || 'var(--cat-otros)';
+    }
+
+    function renderizar() {
+      let productosFiltrados = [...productos];
+
+      if (busquedaActual) {
+        productosFiltrados = productosFiltrados.filter(p =>
+          p.name.toLowerCase().includes(busquedaActual)
+        );
+      }
+
+      if (categoriaActual !== 'todos') {
+        productosFiltrados = productosFiltrados.filter(p =>
+          (p.category || 'otros') === categoriaActual
+        );
+      }
+
+      const productosOrdenados = [...productosFiltrados].sort((a, b) => {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'es', { sensitivity: 'base' });
+      });
+
+      const pendientes = productosOrdenados.filter(p => p.status === 'pending');
+      const comprados = productosOrdenados.filter(p => p.status === 'purchased');
+
+      let html = '';
+      let totalPendiente = 0;
+      let totalComprado = 0;
+
+      pendientes.forEach(p => {
+        const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+        totalPendiente += subtotal;
+      });
+
+      comprados.forEach(p => {
+        const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+        totalComprado += subtotal;
+      });
+
+      // Lista única, ordenada alfabéticamente (sin agrupar por categoría)
+      if (pendientes.length > 0) {
+        html += '<div class="category-section">';
+        pendientes.forEach(p => {
+          const subtotal = parseFloat(p.price || 0) * parseInt(p.quantity || 1);
+          const catColor = getCategoryColor(p.category || 'otros');
+          html += crearItemHTML(p, subtotal, false, catColor);
+        });
+        html += '</div>';
+      }
+
+      if (comprados.length > 0) {
+        html += '<div class="archived-section">En Carrito</div>';
+        comprados.forEach(p => {
+          const catColor = getCategoryColor(p.category || 'otros');
+          html += crearItemHTML(p, 0, p.id === ultimoProductoComprado, catColor);
+        });
+      }
+
+      if (productosFiltrados.length === 0) {
+        if (productos.length === 0) {
+          html = `
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-gray);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🛒</div>
+              <div style="font-size: 16px; font-weight: 600;">Tu lista está vacía</div>
+              <div style="font-size: 14px; margin-top: 8px;">Presiona + para agregar productos</div>
+            </div>`;
+        } else {
+          html = `
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-gray);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+              <div style="font-size: 16px; font-weight: 600;">Sin resultados</div>
+              <div style="font-size: 14px; margin-top: 8px;">Prueba con otra búsqueda o categoría</div>
+            </div>`;
+        }
+      }
+
+      document.getElementById('listaProductos').innerHTML = html;
+      document.getElementById('totalPendiente').innerText = `$${formatear(totalPendiente)}`;
+      document.getElementById('totalComprado').innerText = `$${formatear(totalComprado)}`;
+      document.getElementById('totalBs').innerText = `Bs. ${formatear(totalComprado * exchangeRate)}`;
+      document.getElementById('contadorItems').innerText = pendientes.length;
+
+      if (timeoutHighlight) clearTimeout(timeoutHighlight);
+      timeoutHighlight = setTimeout(() => {
+        ultimoProductoComprado = null;
+        if (productos.some(p => p.status === 'purchased')) renderizar();
+      }, 3000);
+    }
+
+    function crearItemHTML(producto, subtotal, esUltimoComprado = false, catColor = 'var(--cat-otros)') {
+      const esPendiente = producto.status === 'pending';
+      const claseExtra = esUltimoComprado ? 'just-purchased' : '';
+      const badgeExtra = esUltimoComprado ? '<span class="just-added-badge">¡Nuevo!</span>' : '';
+      const subtotalReal = parseFloat(producto.price || 0) * parseInt(producto.quantity || 1);
+
+      return `
+        <div class="product-item ${esPendiente ? '' : 'comprado'} ${claseExtra}" style="position: relative; border-left: 3px solid ${catColor};">
+          ${badgeExtra}
+          <div class="product-img" onclick="borrarProducto('${producto.id}', '${escapeHtml(producto.name)}')">🗑️</div>
+          <div class="product-info" onclick="cambiarEstado('${producto.id}', '${producto.status}')">
+            <div class="product-name-row">
+              <span class="cat-dot" style="background: ${catColor};"></span>
+              <span class="product-name">${escapeHtml(producto.name)}</span>
+            </div>
+            <div class="product-subtotal">
+              $${formatear(producto.price || 0)} × ${producto.quantity} = <b>$${formatear(subtotalReal)}</b>
+            </div>
+          </div>
+          <div class="price-badge" onclick="editarPrecio('${producto.id}')">
+            $${formatear(producto.price || 0)}
+          </div>
+          <div class="quantity-controls">
+            <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity - 1})">−</button>
+            <span class="qty-value">${producto.quantity}</span>
+            <button class="qty-btn" onclick="ajustarCantidad('${producto.id}', ${producto.quantity + 1})">+</button>
+          </div>
+        </div>`;
+    }
+
+    async function editarPrecio(productId) {
+      const producto = productos.find(p => p.id === productId);
+      if (!producto) return;
+
+      modalAbierto = true;
+
+      const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
+        title: '💲 Precio',
+        html: `
+          <div style="font-size:12px;color:#666;margin-bottom:4px;">${escapeHtml(producto.name)}</div>
+          <div style="font-size:11px;color:#999;">Actual: $${formatear(producto.price || 0)}</div>
+        `,
+        input: 'text',
+        inputValue: formatear(producto.price || 0),
+        inputAttributes: {
+          'inputmode': 'decimal',
+          'enterkeyhint': 'done',
+          'autocomplete': 'off',
+          'autocapitalize': 'off',
+          'spellcheck': 'false'
+        },
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') return 'Ingresa un precio';
+          const num = parseFloat(value.replace(',', '.'));
+          if (isNaN(num)) return 'Precio inválido';
+          if (num < 0) return 'No puede ser negativo';
+        },
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '✓ Guardar',
+        denyButtonText: '🧮 Calculadora',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        denyButtonColor: '#007aff',
+        cancelButtonColor: '#8e8e93',
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        position: 'top',
+        customClass: { container: 'modal-top', popup: 'modal-top-popup' },
+        didOpen: () => {
+          setTimeout(() => {
+            const input = document.querySelector('.swal2-input');
+            if (input) { input.focus(); input.select(); }
+          }, 100);
+        }
+      });
+
+      modalAbierto = false;
+
+      if (isDenied) { await abrirCalculadoraPrecio(productId); return; }
+
+      if (isConfirmed && resultado) {
+        const precio = parseFloat(resultado.replace(',', '.')) || 0;
+        await guardarPrecio(productId, precio);
+      }
+
+      await recargarDatos();
+    }
+
+    async function abrirCalculadoraPrecio(productId) {
+      const producto = productos.find(p => p.id === productId);
+      if (!producto) return;
+
+      modalAbierto = true;
+
+      const { value: resultado, isConfirmed, isDenied } = await Swal.fire({
+        title: '🧮 Calculadora',
+        html: `
+          <div style="font-size:11px;color:#666;margin-bottom:6px;">${escapeHtml(producto.name)}</div>
+          <div style="background:#f0f8ff;padding:6px;border-radius:6px;font-size:10px;color:#007aff;">
+            Ej: <code>1.2+1.5</code> · <code>10*2</code> · <code>50-10</code>
+          </div>
+        `,
+        input: 'text',
+        inputPlaceholder: '1.2+1.5+2.3',
+        inputAttributes: {
+          'inputmode': 'text',
+          'enterkeyhint': 'done',
+          'autocomplete': 'off',
+          'autocapitalize': 'off',
+          'spellcheck': 'false'
+        },
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') return 'Ingresa una expresión';
+          try {
+            const r = evaluarExpresion(value);
+            if (isNaN(r) || !isFinite(r)) return 'Inválida';
+            if (r < 0) return 'No negativo';
+          } catch (e) { return 'Error'; }
+        },
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '✓ Asignar',
+        denyButtonText: '← Atrás',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        denyButtonColor: '#8e8e93',
+        cancelButtonColor: '#ff3b30',
+        allowOutsideClick: false,
+        position: 'top',
+        customClass: { container: 'modal-top', popup: 'modal-top-popup' },
+        didOpen: () => {
+          setTimeout(() => {
+            const input = document.querySelector('.swal2-input');
+            if (input) input.focus();
+          }, 100);
+        }
+      });
+
+      modalAbierto = false;
+
+      if (isDenied) { await editarPrecio(productId); return; }
+
+      if (isConfirmed && resultado) {
+        try {
+          const precioFinal = evaluarExpresion(resultado);
+
+          const confirmar = await Swal.fire({
+            title: '¿Asignar?',
+            html: `
+              <div style="font-family:monospace;background:#f5f5f7;padding:6px;border-radius:6px;margin:6px 0;">
+                ${resultado} = <b>$${formatear(precioFinal)}</b>
+              </div>
+              <div style="font-size:11px;color:#888;">${escapeHtml(producto.name)}</div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#28a745',
+            position: 'top',
+            customClass: { container: 'modal-top', popup: 'modal-top-popup' }
+          });
+
+          if (confirmar.isConfirmed) {
+            await guardarPrecio(productId, precioFinal);
+            showToast(`$${formatear(precioFinal)}`);
+          } else {
+            await abrirCalculadoraPrecio(productId);
+            return;
+          }
+        } catch (e) {
+          showToast('Error', 'error');
+          await abrirCalculadoraPrecio(productId);
+          return;
+        }
+      }
+
+      await recargarDatos();
+    }
+
+    async function guardarPrecio(productId, precio) {
+      const { error } = await supabaseClient
+        .from('products').update({ price: precio }).eq('id', productId);
+      if (error) showToast('Error', 'error');
+      else showToast(`$${formatear(precio)}`);
+    }
+
+    function evaluarExpresion(expresion) {
+      let expr = expresion.replace(/,/g, '.');
+      if (!/^[\d+\-*/().\s]+$/.test(expr)) throw new Error('Caracteres no permitidos');
+      const resultado = new Function('return ' + expr)();
+      return Math.round(resultado * 100) / 100;
+    }
+
+    async function recargarDatos() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('products').select('*').order('created_at', { ascending: false });
+        if (!error && data) { productos = data; renderizar(); }
+      } catch (e) { console.error('Error:', e); }
+    }
+
+    async function nuevoProducto() {
+      modalAbierto = true;
+
+      const { value: formValues, isConfirmed } = await Swal.fire({
+        title: 'Nuevo Producto',
+        html: `
+          <input id="swal-nombre" class="swal2-input" placeholder="Nombre del producto" autocomplete="off">
+          <select id="swal-categoria" class="swal2-select">
+            <option value="otros">📦 Otros</option>
+            <option value="lacteos">🥛 Lácteos</option>
+            <option value="carnes">🥩 Carnes</option>
+            <option value="verduras">🥬 Verduras</option>
+            <option value="frutas">🍎 Frutas</option>
+            <option value="panaderia">🍞 Panadería</option>
+            <option value="bebidas">🥤 Bebidas</option>
+            <option value="despensa">🥫 Despensa</option>
+            <option value="limpieza">🧹 Limpieza</option>
+            <option value="farmacia">🏥 Farmacia</option>
+            <option value="vehiculo">🚗 Vehículo</option>
+          </select>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Agregar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#8e8e93',
+        position: 'top',
+        customClass: { container: 'modal-top' },
+        preConfirm: () => {
+          const nombre = document.getElementById('swal-nombre').value;
+          const categoria = document.getElementById('swal-categoria').value;
+          if (!nombre || nombre.trim() === '') {
+            Swal.showValidationMessage('Escribe un nombre');
+            return;
+          }
+          return { nombre: nombre.trim(), categoria };
+        },
+        didOpen: () => {
+          setTimeout(() => {
+            const input = document.getElementById('swal-nombre');
+            if (input) input.focus();
+          }, 100);
+        }
+      });
+
+      modalAbierto = false;
+
+      if (isConfirmed && formValues) {
+        showLoader(true);
+        try {
+          const { error } = await supabaseClient
+            .from('products')
+            .insert([{
+              name: formValues.nombre,
+              category: formValues.categoria,
+              price: 0,
+              quantity: 1,
+              status: 'pending'
+            }]);
+          if (error) throw error;
+          showToast('Agregado');
+          await recargarDatos();
+        } catch (error) {
+          showToast('Error', 'error');
+        } finally {
+          showLoader(false);
+        }
+      }
+    }
+
+    async function ajustarCantidad(id, nuevaCantidad) {
+      if (nuevaCantidad < 1) return;
+      const { error } = await supabaseClient
+        .from('products').update({ quantity: nuevaCantidad }).eq('id', id);
+      if (error) showToast('Error', 'error');
+    }
+
+    async function cambiarEstado(id, estadoActual) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+      const nuevoEstado = estadoActual === 'pending' ? 'purchased' : 'pending';
+
+      try {
+        const { error } = await supabaseClient
+          .from('products').update({ status: nuevoEstado }).eq('id', id);
+        if (error) { showToast('Error', 'error'); return; }
+
+        if (nuevoEstado === 'purchased') {
+          ultimoProductoComprado = id;
+          if (timeoutHighlight) clearTimeout(timeoutHighlight);
+          mostrarNotificacionConUndo(producto.name, id);
+        }
       } catch (error) {
-        showLoader(false);
         showToast('Error', 'error');
       }
     }
-  }
 
-  async function mostrarHistorial() {
-    showLoader(true);
-    try {
-      const { data, error } = await supabaseClient
-        .from('purchase_history').select('*')
-        .order('archived_date', { ascending: false }).limit(50);
-      showLoader(false);
-      if (error) throw error;
+    function mostrarNotificacionConUndo(nombre, productId) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast-purchase';
+      toast.innerHTML = `
+        <span>✓ <b>${escapeHtml(nombre)}</b></span>
+        <button class="undo-btn" onclick="deshacerUltimaCompra('${productId}')">↶</button>`;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
+    }
 
-      if (!data || data.length === 0) {
+    async function deshacerUltimaCompra(productId) {
+      try {
+        await supabaseClient.from('products').update({ status: 'pending' }).eq('id', productId);
+        showToast('Devuelto');
+        document.querySelectorAll('.toast-purchase').forEach(t => t.remove());
+      } catch (error) {
+        showToast('Error', 'error');
+      }
+    }
+
+    async function borrarProducto(id, nombre) {
+      const result = await Swal.fire({
+        title: '¿Eliminar?',
+        text: `"${nombre}"`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ff3b30',
+        position: 'top',
+        customClass: { container: 'modal-top' }
+      });
+
+      if (result.isConfirmed) {
+        showLoader(true);
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+        showLoader(false);
+        if (error) showToast('Error', 'error');
+        else showToast('Eliminado');
+      }
+    }
+
+    async function archivar() {
+      const comprados = productos.filter(p => p.status === 'purchased');
+      if (comprados.length === 0) {
         Swal.fire({
-          icon: 'info', title: 'Sin historial',
+          icon: 'info', title: 'Carrito vacío',
+          confirmButtonColor: '#007aff',
           position: 'top',
           customClass: { container: 'modal-top' }
         });
         return;
       }
 
-      const porFecha = {};
-      data.forEach(item => {
-        const fecha = new Date(item.archived_date).toLocaleDateString('es-ES');
-        if (!porFecha[fecha]) porFecha[fecha] = { items: [], total: 0 };
-        porFecha[fecha].items.push(item);
-        porFecha[fecha].total += item.total;
-      });
+      const total = comprados.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 1)), 0);
 
-      let html = '<div style="text-align:left;max-height:60vh;overflow-y:auto;">';
-      Object.keys(porFecha).forEach(fecha => {
-        const c = porFecha[fecha];
-        c.items.sort((a, b) =>
-          a.product_name.toLowerCase().localeCompare(b.product_name.toLowerCase(), 'es', { sensitivity: 'base' })
-        );
-
-        html += `
-          <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line-strong);">
-            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--ink);">${fecha}</div>
-            <div style="font-size:11px;color:var(--ink-3);">${c.items.length} productos</div>
-            <div style="display:flex;justify-content:space-between;">
-              <span style="font-size:11px;color:var(--ink-3);">Total</span>
-              <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--brand);">$${formatear(c.total)}</span>
-            </div>
-            <details style="margin-top:6px;">
-              <summary style="font-size:11px;color:var(--brand);cursor:pointer;">Ver detalles</summary>
-              <div style="margin-top:6px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
-                ${c.items.map(i => `
-                  <div style="display:flex;justify-content:space-between;padding:3px 0;">
-                    <span style="font-family:'Inter',sans-serif;">${i.product_name} ×${i.quantity}</span>
-                    <span>$${formatear(i.total)}</span>
-                  </div>`).join('')}
-              </div>
-            </details>
-          </div>`;
-      });
-      html += '</div>';
-
-      Swal.fire({
-        title: 'Historial de compras',
-        html, width: 600,
-        confirmButtonText: 'Cerrar',
+      const result = await Swal.fire({
+        title: '¿Archivar?',
+        html: `<div style="font-size:13px;"><b>${comprados.length}</b> productos · <b style="color:#28a745;">$${formatear(total)}</b></div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Archivar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
         position: 'top',
-        customClass: { container: 'modal-top modal-historial' }
+        customClass: { container: 'modal-top' }
       });
-    } catch (error) {
-      showLoader(false);
-      showToast('Error', 'error');
+
+      if (result.isConfirmed) {
+        showLoader(true);
+        try {
+          const historial = comprados.map(p => ({
+            product_name: p.name,
+            price: p.price || 0,
+            quantity: p.quantity || 1,
+            total: (p.price || 0) * (p.quantity || 1)
+          }));
+          await supabaseClient.from('purchase_history').insert(historial);
+          const ids = comprados.map(p => p.id);
+          await supabaseClient.from('products').update({ status: 'pending' }).in('id', ids);
+          showLoader(false);
+          Swal.fire({
+            icon: 'success', title: '¡Archivado!',
+            text: `$${formatear(total)}`,
+            confirmButtonColor: '#28a745',
+            position: 'top',
+            customClass: { container: 'modal-top' }
+          });
+        } catch (error) {
+          showLoader(false);
+          showToast('Error', 'error');
+        }
+      }
     }
-  }
 
-  async function actualizarTasa(valor) {
-    const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
-    const { error } = await supabaseClient
-      .from('config').update({ exchange_rate: tasa }).eq('id', 1);
-    if (error) showToast('Error', 'error');
-    else { exchangeRate = tasa; renderizar(); showToast('Tasa actualizada'); }
-  }
+    async function mostrarHistorial() {
+      showLoader(true);
+      try {
+        const { data, error } = await supabaseClient
+          .from('purchase_history').select('*')
+          .order('archived_date', { ascending: false }).limit(50);
+        showLoader(false);
+        if (error) throw error;
 
-  function formatear(num) { return (num || 0).toFixed(2).replace('.', ','); }
+        if (!data || data.length === 0) {
+          Swal.fire({
+            icon: 'info', title: 'Sin historial',
+            confirmButtonColor: '#007aff',
+            position: 'top',
+            customClass: { container: 'modal-top' }
+          });
+          return;
+        }
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
+        const porFecha = {};
+        data.forEach(item => {
+          const fecha = new Date(item.archived_date).toLocaleDateString('es-ES');
+          if (!porFecha[fecha]) porFecha[fecha] = { items: [], total: 0 };
+          porFecha[fecha].items.push(item);
+          porFecha[fecha].total += item.total;
+        });
 
-  function showLoader(show) {
-    document.getElementById('loader').style.display = show ? 'block' : 'none';
-  }
+        let html = '<div style="text-align: left; max-height: 60vh; overflow-y: auto;">';
+        Object.keys(porFecha).forEach(fecha => {
+          const c = porFecha[fecha];
+          c.items.sort((a, b) => {
+            return a.product_name.toLowerCase().localeCompare(
+              b.product_name.toLowerCase(), 'es', { sensitivity: 'base' }
+            );
+          });
 
-  function marcarOnline(status) {
-    document.getElementById('statusDot').className = `dot ${status ? 'online' : 'offline'}`;
-    document.getElementById('statusText').innerText = status ? 'En línea' : 'Sin conexión';
-  }
+          html += `
+            <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #eee;">
+              <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px;">📅 ${fecha}</div>
+              <div style="font-size: 11px; color: #666;">${c.items.length} productos</div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="font-size: 11px; color: #888;">Total</span>
+                <span style="font-weight: 700; color: #28a745;">$${formatear(c.total)}</span>
+              </div>
+              <details style="margin-top: 6px;">
+                <summary style="font-size: 11px; color: #007aff;">Ver detalles</summary>
+                <div style="margin-top: 6px; font-size: 11px;">
+                  ${c.items.map(i => `
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
+                      <span>${i.product_name} x${i.quantity}</span>
+                      <span>$${formatear(i.total)}</span>
+                    </div>`).join('')}
+                </div>
+              </details>
+            </div>`;
+        });
+        html += '</div>';
 
-  function showToast(message, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `custom-toast ${type === 'error' ? 'error' : ''}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
-  }
+        Swal.fire({
+          title: '📋 Historial',
+          html, width: 600,
+          confirmButtonText: 'Cerrar',
+          confirmButtonColor: '#007aff',
+          position: 'top',
+          customClass: { container: 'modal-top modal-historial' }
+        });
+      } catch (error) {
+        showLoader(false);
+        showToast('Error', 'error');
+      }
+    }
 
-  window.addEventListener('beforeunload', () => {
-    if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
-  });
-</script>
+    async function actualizarTasa(valor) {
+      const tasa = parseFloat(valor.replace(',', '.')) || 36.50;
+      const { error } = await supabaseClient
+        .from('config').update({ exchange_rate: tasa }).eq('id', 1);
+      if (error) showToast('Error', 'error');
+      else { exchangeRate = tasa; renderizar(); showToast('Tasa actualizada'); }
+    }
+
+    function formatear(num) { return (num || 0).toFixed(2).replace('.', ','); }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showLoader(show) {
+      document.getElementById('loader').style.display = show ? 'block' : 'none';
+    }
+
+    function marcarOnline(status) {
+      document.getElementById('onlineStatus').className = `status-dot ${status ? 'online' : 'offline'}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast';
+      toast.style.background = type === 'error' ? 'rgba(255,59,48,0.9)' : 'rgba(0,0,0,0.8)';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+    });
+  </script>
 </body>
 </html>
